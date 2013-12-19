@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/ico">
+        <file>images/Fbur.png</file>
+        <file>images/barcode.png</file>
+        <file>images/folder.png</file>
+        <file>images/image.png</file>
+        <file>images/info.png</file>
+    </qresource>
+</RCC>

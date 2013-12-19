@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Fbur</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="resource.qrc">
+    <normaloff>:/ico/images/Fbur.png</normaloff>:/ico/images/Fbur.png</iconset>
+  </property>
   <property name="tabShape">
    <enum>QTabWidget::Rounded</enum>
   </property>
@@ -26,45 +30,63 @@
      <height>25</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menu">
+   <widget class="QMenu" name="menu_help">
     <property name="title">
-     <string>帮助</string>
+     <string>帮助(H)</string>
     </property>
     <addaction name="action_Fbur"/>
     <addaction name="action_Fubowen"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
-     <string>文件</string>
+     <string>文件(F)</string>
     </property>
     <addaction name="action_import"/>
+    <addaction name="separator"/>
+    <addaction name="action_exit"/>
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="title">
-     <string>编辑</string>
+     <string>编辑(H)</string>
     </property>
    </widget>
    <widget class="QMenu" name="menu_4">
     <property name="title">
-     <string>数据</string>
+     <string>数据(S)</string>
     </property>
     <addaction name="action_calculate"/>
    </widget>
    <widget class="QMenu" name="menu_5">
     <property name="title">
-     <string>绘图</string>
+     <string>视图(V)</string>
     </property>
-    <addaction name="action_linesPlan"/>
+    <widget class="QMenu" name="menu_6">
+     <property name="title">
+      <string>型线图</string>
+     </property>
+     <property name="icon">
+      <iconset resource="resource.qrc">
+       <normaloff>:/ico/images/barcode.png</normaloff>:/ico/images/barcode.png</iconset>
+     </property>
+     <addaction name="action_X"/>
+     <addaction name="action_Y"/>
+     <addaction name="action_Z"/>
+    </widget>
+    <addaction name="menu_6"/>
     <addaction name="action_drawHyCur"/>
    </widget>
    <addaction name="menu_2"/>
    <addaction name="menu_3"/>
    <addaction name="menu_5"/>
    <addaction name="menu_4"/>
-   <addaction name="menu"/>
+   <addaction name="menu_help"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="action_Fbur">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/ico/images/info.png</normaloff>:/ico/images/info.png</iconset>
+   </property>
    <property name="text">
     <string>关于Fbur</string>
    </property>
@@ -73,11 +95,19 @@
    </property>
   </action>
   <action name="action_Fubowen">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/ico/images/info.png</normaloff>:/ico/images/info.png</iconset>
+   </property>
    <property name="text">
     <string>关于作者</string>
    </property>
   </action>
   <action name="action_import">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/ico/images/folder.png</normaloff>:/ico/images/folder.png</iconset>
+   </property>
    <property name="text">
     <string>导入</string>
    </property>
@@ -88,17 +118,50 @@
    </property>
   </action>
   <action name="action_drawHyCur">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/ico/images/image.png</normaloff>:/ico/images/image.png</iconset>
+   </property>
    <property name="text">
     <string>静水力曲线图</string>
    </property>
   </action>
-  <action name="action_linesPlan">
+  <action name="action_X">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/ico/images/barcode.png</normaloff>:/ico/images/barcode.png</iconset>
+   </property>
    <property name="text">
-    <string>型线图</string>
+    <string>横剖面图</string>
+   </property>
+  </action>
+  <action name="action_Y">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/ico/images/barcode.png</normaloff>:/ico/images/barcode.png</iconset>
+   </property>
+   <property name="text">
+    <string>纵剖面图</string>
+   </property>
+  </action>
+  <action name="action_Z">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/ico/images/barcode.png</normaloff>:/ico/images/barcode.png</iconset>
+   </property>
+   <property name="text">
+    <string>水线面图</string>
+   </property>
+  </action>
+  <action name="action_exit">
+   <property name="text">
+    <string>退出</string>
    </property>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="resource.qrc"/>
+ </resources>
  <connections/>
 </ui>

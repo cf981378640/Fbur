@@ -15,9 +15,28 @@ return str;
 
 ship::ship()
 {
+    vZ.clear();
+    vPoints.clear();
+    vPoints2.clear();
+    vZb.clear();          //浮心垂向坐标Zb**静水力曲线;
+    vBm.clear();        //横稳心半径Bm**静水力曲线;
+    vAw.clear();          //水线面面积Aw**静水力曲线;
+    vTPC.clear();         //每厘米吃水吨数TPC**静水力曲线;
+    vMTC.clear();         //每厘米纵倾力矩MTC**静水力曲线;
+    vBml.clear();         //纵稳心半径Bml**静水力曲线;
+    vXf.clear();          //漂心纵坐标Xf**静水力曲线;
+    vXb.clear();          //浮心纵坐标Xb**静水力曲线;
+    vVolume.clear();      //型排水体积Volume**静水力曲线;
+    vDisp.clear();        //总排水量Disp**静水力曲线;
+    vCb.clear();          //方形系数Cb**静水力曲线;
+    vCp.clear();          //棱形系数Cp**静水力曲线;
+    vCwp.clear();         //水线面系数Cwp**静水力曲线;
+    vCm.clear();          //中横剖面系数Cm**静水力曲线;
+
+
    Bm=0,MTC=0,Bml=0;
 
-   Moy=0,Mxoz=0;
+   Mxoz=0;
    Lpp=0,L0=0,d0=0,B=0,deltaL=0;
    nX=0,nZ=0;
 
@@ -30,6 +49,38 @@ ship::~ship()
 {
     //dtor
 }
+
+void ship::Init()
+{
+    vZ.clear();
+    vPoints.clear();
+    vPoints2.clear();
+    vZb.clear();          //浮心垂向坐标Zb**静水力曲线;
+    vBm.clear();        //横稳心半径Bm**静水力曲线;
+    vAw.clear();          //水线面面积Aw**静水力曲线;
+    vTPC.clear();         //每厘米吃水吨数TPC**静水力曲线;
+    vMTC.clear();         //每厘米纵倾力矩MTC**静水力曲线;
+    vBml.clear();         //纵稳心半径Bml**静水力曲线;
+    vXf.clear();          //漂心纵坐标Xf**静水力曲线;
+    vXb.clear();          //浮心纵坐标Xb**静水力曲线;
+    vVolume.clear();      //型排水体积Volume**静水力曲线;
+    vDisp.clear();        //总排水量Disp**静水力曲线;
+    vCb.clear();          //方形系数Cb**静水力曲线;
+    vCp.clear();          //棱形系数Cp**静水力曲线;
+    vCwp.clear();         //水线面系数Cwp**静水力曲线;
+    vCm.clear();          //中横剖面系数Cm**静水力曲线;
+
+
+   Bm=0,MTC=0,Bml=0;
+
+   Mxoz=0;
+   Lpp=0,L0=0,d0=0,B=0,deltaL=0;
+   nX=0,nZ=0;
+
+   cx=m=n=ma=cs=cw=mw=nw=0;
+   Xm=Lpp=Loa=B=Bw=deltaL=omega=f=0.0;
+}
+
 void ship::importPrinDim()
 {
     if(!inFile.eof())
@@ -76,6 +127,7 @@ void ship::importOffsets()
             }
         }
     }
+    vPoints2=vPoints;
 }
 
 void ship::importAddPTrans()
@@ -166,7 +218,7 @@ bool ship::import(string fileName)
 }
 
 
-vector<sPoint> ship::drawXZ(double &x)
+vector<sPoint> ship::drawXZ(const double &x)
 {
     //
     vector<sPoint> v;
@@ -176,23 +228,35 @@ vector<sPoint> ship::drawXZ(double &x)
     return v;
 }
 
-vector<sPoint> ship::drawYZ(sPoint &s)
+vector<sPoint> ship::drawYX(const sPoint &s)
+{
+    //
+    vector<sPoint> v;
+    for (sPoint p : vPoints2)
+        if(p.y==s.y)v.push_back(p);
+//    sort(v.begin(),v.end(),Cmp_by_Z());
+    return v;
+}
+
+/*
+vector<sPoint> ship::drawYX(const sPoint &s)
 {
     vector<sPoint> v;
     vector<sPoint> u;
-    for (sPoint p : vPoints)
+    for (sPoint p : vPoints2)
         if(p.y==s.y)
         {
             if(p.x<ma)v.push_back(p);
             else u.push_back(p);
         }
-    sort(v.begin(),v.end(),Cmp_by_Z());
-    sort(u.begin(),u.end(),Cmp_by_Z());
+    sort(v.begin(),v.end(),Cmp_by_X());
+    sort(u.begin(),u.end(),Cmp_by_X());
     v.insert(v.end(), u.begin(), u.end());
     return v;
 }
+*/
 
-vector<sPoint> ship::drawZX(double &z)
+vector<sPoint> ship::drawZX(const double &z)
 {
     vector<sPoint> v;
     for (sPoint p : vPoints)
@@ -285,10 +349,10 @@ void ship::drawCm()
 }*/
 void ship::calculateAreaXy(double zzz)
 {
-    double sumY=0,sumMoy=0;
+    double sumY=0,sumMoy=0,sumIt=0,sumIl=0;
     int i=0;
     sPoint pBegin,pEnd;
-    for (sPoint p : vPoints)
+    for (sPoint p : vPoints2)
         {
             if (p.z-zzz>-0.00001&&p.z-zzz<0.00001&&i<=nX)  //0.000001改用 const 常量
             {
@@ -296,21 +360,44 @@ void ship::calculateAreaXy(double zzz)
                 pEnd=p;
                 switch(i%2)
                 {
-                     case 0:sumY+=(2*p.y);sumMoy+=(i-Xm)*2*p.y;break;
-                     case 1:sumY+=(4*p.y);sumMoy+=(i-Xm)*4*p.y;break;
+                case 0:
+                    sumY+=(2*p.y);
+                    sumMoy+=(i-Xm)*2*p.y;
+                    sumIt+=2*p.y*p.y*p.y;
+                    sumIl+=2*(i-Xm)*(i-Xm)*p.y;
+
+                    break;
+
+                case 1:
+                    sumY+=(4*p.y);
+                    sumMoy+=(i-Xm)*4*p.y;
+                    sumIt+=4*p.y*p.y*p.y;
+                    sumIl+=4*(i-Xm)*(i-Xm)*p.y;
+
+                    break;
+
+                default :break;
                 }
                 i++;
             }
         }
-    sumY-=(pBegin.y+pEnd.y);
-//    cerr<<"sumY"<<sumY<<endl;
 
     double deltaX=(pEnd.x-pBegin.x)/(i-1)*deltaL;     //i可能为0，之后验证
-    double Aw=2.0*sumY*deltaX/3.0;
-    cerr<<"Aw"<<Aw<<endl;
+
+    sumY-=(pBegin.y+pEnd.y);
+//    cerr<<"sumY"<<sumY<<endl;
+    double Aw=2.0*sumY*deltaX/3.0;            //水线面面积Aw
+//    cerr<<"Aw"<<Aw<<endl;
 
     sumMoy-=-nX*pBegin.y/2.0+nX*pEnd.y/2.0;
-    Moy=2*sumMoy*deltaX*deltaX/3;
+    double Moy=2.0*sumMoy*deltaX*deltaX/3;         //水线面对OY轴静矩Moy
+
+    sumIt-=pEnd.y*pEnd.y*pEnd.y+pBegin.y*pBegin.y*pBegin.y;
+    double It=sumIt*deltaX*2.0/9.0;                //水线面的横向惯性矩  (最后的系数可能有错; 已经修正！)
+
+
+    sumIl-=-pBegin.y*Xm*Xm+pEnd.y*Xm*Xm;
+    double Il=2.0*sumIl*deltaX*deltaX/3;                //水线面的横向惯性矩  (最后的系数可能有错; 已经修正！)
 
     double Xf=Moy/Aw;
 
@@ -319,14 +406,24 @@ void ship::calculateAreaXy(double zzz)
     double TPC=omega*Aw/100;
     sZValue p;
     p.z=zzz;
+
     p.value=Aw;
     vAw.push_back(p);
+
     p.value=Xf;
     vXf.push_back(p);
+
     p.value=Cwp;
     vCwp.push_back(p);
+
     p.value=TPC;
     vTPC.push_back(p);
+
+    p.value=It;
+    vIt.push_back(p);
+
+    p.value=Il;
+    vIl.push_back(p);
 }
 
 void ship::calculateAreaYz(double xxx,double zzz)
@@ -334,7 +431,7 @@ void ship::calculateAreaYz(double xxx,double zzz)
     double sumY=0,sumMoyy=0,deltaZ=0;    //sumMoyy用于画邦戎曲线
     int i=0;
     sPoint pBegin,pEnd;
-    for (sPoint p : vPoints)
+    for (sPoint p : vPoints2)
     {
         if(p.x-xxx>-0.0001&&p.x-xxx<0.0001)
         {
@@ -357,7 +454,7 @@ void ship::calculateVolume(double zzz)
 {
     int i=0;
     double Xb=0,Zb=0;
-    double Volume;
+    double Volume=0;
     double sumArea=0,sumMyoz=0,sumMxoy=0;
     double areaBegin,areaEnd,xfBegin=0,xfEnd=0;
 
@@ -367,7 +464,6 @@ void ship::calculateVolume(double zzz)
  //           cout<<zz<<"\t";
             if(i==0)
             {
-
                 areaBegin=getAreaXy(zz);
                 xfBegin=getXf(zz);
             }
@@ -402,18 +498,41 @@ void ship::calculateVolume(double zzz)
     double Cb=Volume/(Lpp*B*zzz);
     double Disp=omega*Volume;
 
+    for(sZValue pp : vIt)           //获取对应的It,用的多的话改成函数；
+        if(pp.z=zzz)
+            double Bm=pp.value/Volume;
+
+    for(sZValue pp : vIl)           //获取对应的It,用的多的话改成函数；
+        if(pp.z=zzz)
+            double Bml=(pp.value-getAreaXy(pp.z)*getXf(pp.z)*getXf(pp.z))/Volume;
+    double MTC=Volume*Bml/(100*Lpp);
+
     sZValue p;
     p.z=zzz;
+
     p.value=Volume;
     vVolume.push_back(p);
+
     p.value=Zb;
     vZb.push_back(p);
+
     p.value=Xb;
     vXb.push_back(p);
+
     p.value=Cb;
     vCb.push_back(p);
+
     p.value=Disp;
     vDisp.push_back(p);
+
+    p.value=Bm;
+    vBm.push_back(p);
+
+    p.value=Bml;
+    vBml.push_back(p);
+
+    p.value=MTC;
+    vMTC.push_back(p);
 }
 /*
 void ship::calculate(double xxx=-1,double zzz=-1)
@@ -428,6 +547,7 @@ double ship::getAreaXy(double z)           //用常量引用
 {
     for(sZValue p : vAw)
         if(p.z==z)return p.value;
+return -1;
 /*
     calculateAreaXy(zzz);
     return Aw;
@@ -468,6 +588,8 @@ double ship::getXf(double z)
 {
     for(sZValue p : vXf)
         if(p.z==z)return p.value;
+        else return -1;
+
     /*
     calculateAreaXy(zzz);
     return Xf;
@@ -479,6 +601,8 @@ double ship::getVolume(double z)
 {
     for(sZValue p : vVolume)
         if(p.z==z)return p.value;
+        else return -1;
+
 /*
     calculateVolume(-1);
     return Volume;
@@ -495,8 +619,9 @@ void ship::calculate()
     calCm(z);
     calCp(z);
     }
-    for(sZValue p : vAw)
+/*    for(sZValue p : vAw)
         cerr<<"vAw:"<<p.z<<","<<p.value<<endl;
+*/
 }
 /*
 double ship::getVolume(double zzz)

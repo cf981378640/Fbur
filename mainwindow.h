@@ -33,6 +33,14 @@ private slots:
 
     void on_action_linesPlan_triggered();
 
+    void on_action_X_triggered();
+
+    void on_action_Y_triggered();
+
+    void on_action_Z_triggered();
+
+    void on_action_exit_triggered();
+
 private:
     Ui::MainWindow *ui;
     ShipWidget *ship1;

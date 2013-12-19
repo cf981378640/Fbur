@@ -64,9 +64,11 @@ class ship
 
         bool import(string fileName);
 
-        vector<sPoint> drawXZ(double &x);            //返回某站的点，按Z排序;
-        vector<sPoint> drawYZ(sPoint &s);            //返回某站的点，按Z排序;
-        vector<sPoint> drawZX(double &z);            //返回某水线面的点，按x排序;
+        vector<sPoint> drawXZ(const double &x);            //返回某站的点，按Z排序;
+        vector<sPoint> drawYX(const sPoint &s);            //返回某站的点，按X排序;
+        vector<sPoint> drawZX(const double &z);            //返回某水线面的点，按x排序;
+
+
 /*
         void drawZb();                            //绘制Zb;
         void drawAreaXy();                        //绘制水线面图;
@@ -137,6 +139,9 @@ class ship
         void calculateAreaYz(double xxx,double zzz);
         void calculateVolume(double zzz);
 
+        void Init();
+
+
         int cx,m,n,ma,cs,cw,mw,nw;
         //依次为 cx-船舶类型 m-计算横剖面数 n-计算水线数 ma-最大横剖面所在序号
         //cs-横剖面插入点数 cw-水线面插入点数
@@ -165,6 +170,7 @@ class ship
         vector<double> vZ;
         sPoint pPoint;
         vector<sPoint> vPoints;
+        vector<sPoint> vPoints2;
 
         vector<sZValue> vZb;                 //浮心垂向坐标Zb**静水力曲线;
         vector<sZValue> vBm;     //**        //横稳心半径Bm**静水力曲线;
@@ -180,6 +186,10 @@ class ship
         vector<sZValue> vCp;                 //棱形系数Cp**静水力曲线;
         vector<sZValue> vCwp;                //水线面系数Cwp**静水力曲线;
         vector<sZValue> vCm;                 //中横剖面系数Cm**静水力曲线;
+
+        vector<sZValue> vIt;                 //水线面的横向惯性矩--用于计算横稳心;
+        vector<sZValue> vIlf;                //水线面的纵向惯性矩（对于漂心横轴）--用于计算纵稳心;
+        vector<sZValue> vIl;                 //水线面的纵向惯性矩（对于中站横轴）--用于计算Ilf;
 };
 
 #endif // SHIP_H

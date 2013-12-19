@@ -18,7 +18,7 @@ public:
 
     ShipWidget(QWidget *parent = 0);
 
-    int mode;
+    int mode,lmode;
 protected:
     void initializeGL();
     void resizeGL(int width, int height);
@@ -45,6 +45,14 @@ private:
     void drawXf();
     void drawVolume();
     void drawXb();
+    void drawMTC();
+    void drawBml();
+    void drawBm();
+    void drawDisp();
+    void drawCp();
+    void drawCb();
+    void drawCm();
+    void drawCwp();
 };
 
 #endif // ShipWidget_H
