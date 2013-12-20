@@ -31,8 +31,6 @@ private slots:
 
     void on_action_drawHyCur_triggered();
 
-    void on_action_linesPlan_triggered();
-
     void on_action_X_triggered();
 
     void on_action_Y_triggered();

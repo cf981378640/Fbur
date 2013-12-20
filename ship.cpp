@@ -33,10 +33,6 @@ ship::ship()
     vCwp.clear();         //水线面系数Cwp**静水力曲线;
     vCm.clear();          //中横剖面系数Cm**静水力曲线;
 
-
-   Bm=0,MTC=0,Bml=0;
-
-   Mxoz=0;
    Lpp=0,L0=0,d0=0,B=0,deltaL=0;
    nX=0,nZ=0;
 
@@ -70,10 +66,6 @@ void ship::Init()
     vCwp.clear();         //水线面系数Cwp**静水力曲线;
     vCm.clear();          //中横剖面系数Cm**静水力曲线;
 
-
-   Bm=0,MTC=0,Bml=0;
-
-   Mxoz=0;
    Lpp=0,L0=0,d0=0,B=0,deltaL=0;
    nX=0,nZ=0;
 
@@ -347,63 +339,36 @@ void ship::drawCm()
 }
 
 }*/
-void ship::calculateAreaXy(double zzz)
+void ship::calculateAw(double zzz)            //改用梯形法（有些站没有交点的问题；2013/12/20）
 {
-    double sumY=0,sumMoy=0,sumIt=0,sumIl=0;
-    int i=0;
-    sPoint pBegin,pEnd;
+    double sumAw=0,sumMoy=0,sumIt=0,sumIl=0;
+    double xx=-1,yy=-1;
     for (sPoint p : vPoints2)
         {
-            if (p.z-zzz>-0.00001&&p.z-zzz<0.00001&&i<=nX)  //0.000001改用 const 常量
+            if (p.z-zzz>-0.00001&&p.z-zzz<0.00001)  //0.000001改用 const 常量
             {
-                if(i==0)pBegin=p;
-                pEnd=p;
-                switch(i%2)
+
+                if(xx!=-1)
                 {
-                case 0:
-                    sumY+=(2*p.y);
-                    sumMoy+=(i-Xm)*2*p.y;
-                    sumIt+=2*p.y*p.y*p.y;
-                    sumIl+=2*(i-Xm)*(i-Xm)*p.y;
-
-                    break;
-
-                case 1:
-                    sumY+=(4*p.y);
-                    sumMoy+=(i-Xm)*4*p.y;
-                    sumIt+=4*p.y*p.y*p.y;
-                    sumIl+=4*(i-Xm)*(i-Xm)*p.y;
-
-                    break;
-
-                default :break;
+                    sumAw+=(p.y+yy)*(p.x-xx)/2.0;
+                    sumMoy+=(p.x*p.y+xx*yy)*(p.x-xx)/2.0;
+                    sumIt+=(p.y*p.y*p.y+yy*yy*yy)*(p.x-xx)/2.0;
+                    sumIl+=(p.x*p.x*p.y+xx*xx*yy)*(p.x-xx)/2.0;
                 }
-                i++;
+                xx=p.x;
+                yy=p.y;
             }
         }
 
-    double deltaX=(pEnd.x-pBegin.x)/(i-1)*deltaL;     //i可能为0，之后验证
-
-    sumY-=(pBegin.y+pEnd.y);
-//    cerr<<"sumY"<<sumY<<endl;
-    double Aw=2.0*sumY*deltaX/3.0;            //水线面面积Aw
-//    cerr<<"Aw"<<Aw<<endl;
-
-    sumMoy-=-nX*pBegin.y/2.0+nX*pEnd.y/2.0;
-    double Moy=2.0*sumMoy*deltaX*deltaX/3;         //水线面对OY轴静矩Moy
-
-    sumIt-=pEnd.y*pEnd.y*pEnd.y+pBegin.y*pBegin.y*pBegin.y;
-    double It=sumIt*deltaX*2.0/9.0;                //水线面的横向惯性矩  (最后的系数可能有错; 已经修正！)
-
-
-    sumIl-=-pBegin.y*Xm*Xm+pEnd.y*Xm*Xm;
-    double Il=2.0*sumIl*deltaX*deltaX/3;                //水线面的横向惯性矩  (最后的系数可能有错; 已经修正！)
+    double Aw=2.0*sumAw;            //水线面面积Aw
+    double Moy=2.0*sumMoy;         //水线面对OY轴静矩Moy
+    double It=sumIt*2.0/3.0;       //水线面的横向惯性矩
+    double Il=2.0*sumIl;           //水线面的横向惯性矩
 
     double Xf=Moy/Aw;
-
     double Cwp=Aw/Lpp/B;
-
     double TPC=omega*Aw/100;
+
     sZValue p;
     p.z=zzz;
 
@@ -426,7 +391,7 @@ void ship::calculateAreaXy(double zzz)
     vIl.push_back(p);
 }
 
-void ship::calculateAreaYz(double xxx,double zzz)
+void ship::calculateAs(double xxx,double zzz)
 {
     double sumY=0,sumMoyy=0,deltaZ=0;    //sumMoyy用于画邦戎曲线
     int i=0;
@@ -450,50 +415,66 @@ void ship::calculateAreaYz(double xxx,double zzz)
     Moyy=2*deltaZ*deltaZ*sumMoyy;
     cout<<deltaZ<<endl;
 }
-void ship::calculateVolume(double zzz)
+
+/*
+void ship::calculateAs(double xxx,double zzz)             //问题！！！
 {
-    int i=0;
-    double Xb=0,Zb=0;
-    double Volume=0;
-    double sumArea=0,sumMyoz=0,sumMxoy=0;
-    double areaBegin,areaEnd,xfBegin=0,xfEnd=0;
-
-    for (double zz : vZ)
+    double sumAs=0,sumMoyy=0;    //sumMoyy用于画邦戎曲线
+    double zz=-1,yy=-1;
+    for (sPoint p : vPoints2)
         {
-            if(zzz!=-1&&zz-0.0001>zzz)break;
- //           cout<<zz<<"\t";
-            if(i==0)
+        if(zzz!=-1&&p.z>(zzz+0.001))break;
+        if(p.x==xxx)  //0.0001改用 const 常量
             {
-                areaBegin=getAreaXy(zz);
-                xfBegin=getXf(zz);
+                if(zz!=-1)
+                {
+                    sumAs+=(p.y+yy)*(p.z-zz)/2.0;
+                    sumMoyy+=(p.z*p.y+zz*yy)*(p.z-zz)/2.0;
+                }
+                zz=p.z;
+                yy=p.y;
             }
-            areaEnd=getAreaXy(zz);
-            xfEnd=getXf(zz);
-
-            sumArea+=getAreaXy(zz);
-            sumMyoz+=getAreaXy(zz)*getXf(zz);
-            sumMxoy+=i*getAreaXy(zz);      //此处getAreaXy(zz)可在FOR循环开始时统一计算；
-            i++;
         }
-    if(i>1)
+
+    As=2*sumAs;
+    cerr<<"As"<<zzz<<","<<As<<endl;
+
+    Moyy=2*sumMoyy;
+
+/*
+    sZValue p;
+    p.z=zzz;
+
+    p.value=As;
+    vAs.push_back(p);
+
+    p.value=Za;
+    vZa.push_back(p);
+*/
+//}
+/*
+void ship::calculateVolume(double zzz)            使用纵向计算法
+{
+    double xx=-1;
+    double Xb=0,Zb=0;
+    double oldAs=0,oldMoyy=0;
+    double Volume=0,Myoz=0,Mxoy=0;
+
+    for (sPoint p : vPoints2)
     {
-    sumArea-=(areaBegin+areaEnd)/2;
-    sumMyoz-=(areaEnd*xfEnd+areaBegin*xfBegin)/2;
-    sumMxoy-=i*areaEnd/2;
-
-    Volume=(vZ[1]-vZ[0])*sumArea;
-    Myoz=(vZ[1]-vZ[0])*sumMyoz;
-    Mxoz=(vZ[1]-vZ[0])*(vZ[1]-vZ[0])*sumMxoy;
-
-    //if(Volume==0);
+            if(xx!=-1&&xx!=p.x)
+            {
+                calculateAreaYz(p.x,zzz);
+                Volume+=(As+oldAs)*(p.x-xx)/2.0;
+                Myoz+=(p.x*As+xx*oldAs)*(p.x-xx)/2;
+                Mxoy+=(p.x*Moyy+xx*oldMoyy)*(p.x-xx)/2;
+                xx=p.x;
+                oldAs=As;
+                oldMoyy=Moyy;
+            }
+    }
     Xb=Myoz/Volume;
-    Zb=Mxoz/Volume;
-    }
-    else
-    {
-        Volume=0;
-        Xb=0;
-    }
+    Zb=Mxoy/Volume;
 
     double Cb=Volume/(Lpp*B*zzz);
     double Disp=omega*Volume;
@@ -534,6 +515,100 @@ void ship::calculateVolume(double zzz)
     p.value=MTC;
     vMTC.push_back(p);
 }
+*/
+
+void ship::calculateVolume(double zzz)
+{
+    int i=0;
+    double Xb=0,Zb=0;
+    double Volume=0;
+    double sumArea=0,sumMyoz=0,sumMxoy=0;
+    double areaBegin,areaEnd,xfBegin=0,xfEnd=0;           //之后做优化
+
+    for (double zz : vZ)
+        {
+            if(zzz!=-1&&zz-0.0001>zzz)break;
+ //           cout<<zz<<"\t";
+            if(i==0)
+            {
+                areaBegin=getAreaXy(zz);
+                xfBegin=getXf(zz);
+            }
+            areaEnd=getAreaXy(zz);
+            xfEnd=getXf(zz);
+
+            sumArea+=getAreaXy(zz);
+            sumMyoz+=getAreaXy(zz)*getXf(zz);
+            sumMxoy+=i*getAreaXy(zz);      //此处getAreaXy(zz)可在FOR循环开始时统一计算；
+            i++;
+        }
+    if(i>1)
+    {
+    sumArea-=(areaBegin+areaEnd)/2;
+    sumMyoz-=(areaEnd*xfEnd+areaBegin*xfBegin)/2;
+    sumMxoy-=i*areaEnd/2;
+
+    Volume=(vZ[1]-vZ[0])*sumArea;
+    double Myoz=(vZ[1]-vZ[0])*sumMyoz;
+    double Mxoz=(vZ[1]-vZ[0])*(vZ[1]-vZ[0])*sumMxoy;
+
+    //if(Volume==0);
+    Xb=Myoz/Volume;
+    Zb=Mxoz/Volume;
+    }
+    else
+    {
+        Volume=0;
+        Xb=0;
+    }
+
+    double Cb=Volume/(Lpp*B*zzz);
+    double Cp=Volume/(getAreaXy(zzz)*zzz);
+    double Disp=omega*Volume;
+
+    double Bm=0;
+    for(sZValue pp : vIt)           //获取对应的It,用的多的话改成函数；
+        if(pp.z==zzz)
+            Bm=pp.value/Volume;
+
+    double Bml=0;
+    for(sZValue pp : vIl)           //获取对应的It,用的多的话改成函数；
+        if(pp.z==zzz)
+            Bml=(pp.value-getAreaXy(pp.z)*getXf(pp.z)*getXf(pp.z))/Volume;
+    double MTC=Volume*Bml/(100*Lpp);
+
+    sZValue p;
+    p.z=zzz;
+
+    p.value=Volume;
+    vVolume.push_back(p);
+
+    p.value=Zb;
+    vZb.push_back(p);
+
+    p.value=Xb;
+    vXb.push_back(p);
+
+
+    p.value=Disp;
+    vDisp.push_back(p);
+
+    p.value=Bm;
+    vBm.push_back(p);
+
+    p.value=Bml;
+    vBml.push_back(p);
+
+    p.value=MTC;
+    vMTC.push_back(p);
+
+    p.value=Cb;
+    vCb.push_back(p);
+
+    p.value=Cp;
+    vCp.push_back(p);
+}
+
 /*
 void ship::calculate(double xxx=-1,double zzz=-1)
 {
@@ -576,7 +651,8 @@ double ship::getBml(double zzz)
 */
 double ship::getAreaYz(double x,double z)
 {
-    calculateAreaYz(x,z);
+    calculateAs(x,z);
+    cerr<<"As"<<As<<endl;
     return As;
 }
 double ship::getAreaYz(double xxx)
@@ -588,7 +664,7 @@ double ship::getXf(double z)
 {
     for(sZValue p : vXf)
         if(p.z==z)return p.value;
-        else return -1;
+        return -1;
 
     /*
     calculateAreaXy(zzz);
@@ -601,7 +677,7 @@ double ship::getVolume(double z)
 {
     for(sZValue p : vVolume)
         if(p.z==z)return p.value;
-        else return -1;
+        return -1;
 
 /*
     calculateVolume(-1);
@@ -615,9 +691,8 @@ void ship::calculate()
     for(double z : vZ)
     {
     calculateVolume(z);
-    calculateAreaXy(z);
+    calculateAw(z);
     calCm(z);
-    calCp(z);
     }
 /*    for(sZValue p : vAw)
         cerr<<"vAw:"<<p.z<<","<<p.value<<endl;
@@ -643,7 +718,7 @@ double ship::getCb(double zzz)
     return Cb;
 }
 */
-void ship::calCp(double zzz)
+/*void ship::calCp(double zzz)
 {
     //getAreaYz(ma,zzz)在最高的水面为nan
     //棱形系数
@@ -656,6 +731,8 @@ void ship::calCp(double zzz)
     p.value=Cp;
     vCb.push_back(p);
 }
+*/
+
 /*
 double ship::getCwp(double zzz)
 {
@@ -663,14 +740,19 @@ double ship::getCwp(double zzz)
     return Cwp;
 }
 */
+
+
 void ship::calCm(double zzz)
 {
-    double Cm=getAreaYz(ma,zzz)/(B*zzz);
+    calculateAs(ma,zzz);
+    double Cm=As/(B*zzz);
     sZValue p;
     p.z=zzz;
     p.value=Cm;
+//    cerr<<"Cm"<<Cm<<","<<endl;
     vCm.push_back(p);
 }
+
 /*
 double ship::getXb(double zzz)
 {

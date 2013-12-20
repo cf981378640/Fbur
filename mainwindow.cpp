@@ -86,14 +86,6 @@ void MainWindow::on_action_drawHyCur_triggered()
     ship1->updateGL();
 }
 
-void MainWindow::on_action_linesPlan_triggered()
-{
-    ship1->mode=1;
-    ship1->lmode=1;
-    ship1->updateGL();
-
-}
-
 void MainWindow::on_action_X_triggered()
 {
     ship1->lmode=1;

@@ -135,8 +135,8 @@ class ship
         void importAddPWplane();
 
         void calculate(double xxx,double zzz);
-        void calculateAreaXy(double zzz);
-        void calculateAreaYz(double xxx,double zzz);
+        void calculateAw(double zzz);
+        void calculateAs(double xxx,double zzz);
         void calculateVolume(double zzz);
 
         void Init();
@@ -160,10 +160,10 @@ class ship
         //o:  设计纵倾(m)
 
 
-        double Bm,MTC,Bml;
+//        double Bm,MTC,Bml;
 
         double d;
-        double As,Moy,Moyy,Myoz,Mxoz;   //Aw-水线面面积，As-横剖面面积，Xf-漂心纵向坐标，Xb-浮心纵向坐标，cWP水线面系数，Moy-水线面对船舯的面矩
+        double As,Moy,Moyy;   //Aw-水线面面积，As-横剖面面积，Xf-漂心纵向坐标，Xb-浮心纵向坐标，cWP水线面系数，Moy-水线面对船舯的面矩
         double L0,d0;  //L-垂线间长,L0-0站以后部分长度，d0-0站以后部分形心到0站距离
         int nX,nZ;             //nX-站数
 
