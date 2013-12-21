@@ -117,7 +117,7 @@ void ShipWidget::mouseMoveEvent(QMouseEvent *event)
 void ShipWidget::wheelEvent(QWheelEvent *event)
 {
     GLfloat dd=event->delta();
-    sscale+=dd/2000;
+    sscale+=dd/5000;
     updateGL();
 }
 
@@ -222,7 +222,7 @@ void ShipWidget::drawHyCur()
      glMatrixMode(GL_MODELVIEW);
      glLoadIdentity();
      glTranslatef(-2.0, -1.0, -10.0);
-     glScalef(sscale/2,0.75,1);
+     glScalef(sscale*1.2,0.6,1);
 
     qglColor(Qt::gray);
     drawAxes();
@@ -276,7 +276,7 @@ void ShipWidget::drawZb()
     for(sZValue p: vZb)
     {   i++;
         if(0==i)continue;
-        glVertex3f(p.value,p.z,-1);
+        glVertex3f(p.value/2.5,p.z,-1);
 
 //        cerr<<"Zb静水力曲线"<<p.value<<","<<p.z<<endl;
     }
@@ -291,7 +291,7 @@ void ShipWidget::drawAw()
     for(sZValue p: vAw)
     {   i++;
         if(0==i)continue;
-        glVertex3f(p.value/100,p.z,-1);
+        glVertex3f(p.value/500,p.z,-1);
 //        cerr<<"AW静水力曲线"<<p.value/(Lpp*B)*2<<","<<p.z<<endl;
     }
 
@@ -305,7 +305,7 @@ void ShipWidget::drawTPC()
     for(sZValue p: vTPC)
     {   i++;
         if(0==i)continue;
-        glVertex3f(p.value,p.z,-1);
+        glVertex3f(p.value/5,p.z,-1);
 //        cerr<<"TPC静水力曲线"<<p.value<<","<<p.z<<endl;
     }
     glEnd();
@@ -318,7 +318,7 @@ void ShipWidget::drawXf()           //有问题！！！！
     for(sZValue p: vXf)
     {   i++;
         if(0==i)continue;
-        glVertex3f((p.value+Xm*deltaL)/2.5,p.z,-1);
+        glVertex3f((p.value+Xm)/2.5,p.z,-1);
 //        cerr<<"Xf静水力曲线"<<p.value<<","<<p.z<<endl;
     }
     glEnd();
@@ -331,7 +331,7 @@ void ShipWidget::drawXb()           //
     for(sZValue p: vXb)
     {   i++;
         if(0==i)continue;
-        glVertex3f(p.value,p.z,-1);
+        glVertex3f((p.value+Xm)/2.5,p.z,-1);
 //        cerr<<"Xb静水力曲线"<<p.value+Xm*deltaL/3<<","<<p.z<<endl;
     }
     glEnd();
@@ -345,7 +345,7 @@ void ShipWidget::drawVolume()           //
     for(sZValue p: vVolume)
     {   i++;
         if(0==i)continue;
-        glVertex3f(p.value/50,p.z,-1);
+        glVertex3f(p.value/100,p.z,-1);
 //        cerr<<"Volume静水力曲线"<<p.value/Lpp/B<<","<<p.z<<endl;
     }
     glEnd();
@@ -359,7 +359,7 @@ void ShipWidget::drawDisp()           //
     for(sZValue p: vDisp)
     {   i++;
         if(0==i)continue;
-        glVertex3f(p.value/50,p.z,-1);
+        glVertex3f(p.value/100,p.z,-1);
 //        cerr<<"Disp静水力曲线"<<p.value/Lpp/B<<","<<p.z<<endl;
     }
     glEnd();
@@ -401,7 +401,7 @@ void ShipWidget::drawMTC()           //
     for(sZValue p: vMTC)
     {   i++;
         if(0==i)continue;
-        glVertex3f(p.value,p.z,-1);
+        glVertex3f(p.value/25,p.z,-1);
 //        cerr<<"MTC静水力曲线"<<p.value<<","<<p.z<<endl;
     }
     glEnd();
@@ -457,7 +457,7 @@ void ShipWidget::drawCp()           //
     for(sZValue p: vCp)
     {   i++;
         if(0==i)continue;
-        glVertex3f(p.value,p.z,-1);
+        glVertex3f(p.value*10,p.z,-1);
 //        cerr<<"Cp静水力曲线"<<p.value<<","<<p.z<<endl;
     }
     glEnd();
