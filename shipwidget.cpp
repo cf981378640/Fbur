@@ -21,7 +21,7 @@ ShipWidget::ShipWidget(QWidget *parent)
     rotationX = -20.0;
     rotationY = -20.0;
     rotationZ = 5.0;
-    sscale = 0.25;
+    sscale = 0.5;
 }
 
 void ShipWidget::initializeGL()
@@ -222,10 +222,12 @@ void ShipWidget::drawHyCur()
      glMatrixMode(GL_MODELVIEW);
      glLoadIdentity();
      glTranslatef(-2.0, -1.0, -10.0);
-     glScalef(sscale,sscale*2,sscale);
-     qglColor(Qt::blue);
+     glScalef(sscale/2,0.75,1);
 
+    qglColor(Qt::gray);
     drawAxes();
+
+    qglColor(Qt::blue);
     drawVolume();
     drawDisp();
     drawXb();
@@ -250,7 +252,6 @@ void ShipWidget::drawAxes()
 {
    double mZ=*max_element(vZ.begin(),vZ.end());
 
-   qglColor(Qt::gray);
    glBegin(GL_LINES);
    for(double i=0;i<Xm*2;i++)   //纵轴
    {
@@ -400,7 +401,7 @@ void ShipWidget::drawMTC()           //
     for(sZValue p: vMTC)
     {   i++;
         if(0==i)continue;
-        glVertex3f(p.value/25,p.z,-1);
+        glVertex3f(p.value,p.z,-1);
 //        cerr<<"MTC静水力曲线"<<p.value<<","<<p.z<<endl;
     }
     glEnd();
@@ -429,7 +430,7 @@ void ShipWidget::drawCm()           //
     {   i++;
         if(0==i)continue;
         glVertex3f(p.value*10,p.z,-1);
-        cerr<<"Cm静水力曲线"<<p.value<<","<<p.z<<endl;
+//        cerr<<"Cm静水力曲线"<<p.value<<","<<p.z<<endl;
     }
     glEnd();
 }

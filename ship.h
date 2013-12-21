@@ -95,7 +95,7 @@ class ship
         */
         double getVolume(double zzz);             //型排水体积Volume**静水力曲线;
         double getXf(double z);                 //漂心纵坐标Xf**静水力曲线;
-        double getAreaXy(double z);             //水线面面积Aw**静水力曲线;
+        double getAw(double z);             //水线面面积Aw**静水力曲线;
 
         void calCp(double zzz);                 //棱形系数Cp**静水力曲线;
         void calCm(double zzz);                 //中横剖面系数Cm**静水力曲线;

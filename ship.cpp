@@ -525,23 +525,28 @@ void ship::calculateVolume(double zzz)
     double sumArea=0,sumMyoz=0,sumMxoy=0;
     double areaBegin,areaEnd,xfBegin=0,xfEnd=0;           //之后做优化
 
+    double Cp=0;
+    double volume2=0;
     for (double zz : vZ)
         {
             if(zzz!=-1&&zz-0.0001>zzz)break;
  //           cout<<zz<<"\t";
             if(i==0)
             {
-                areaBegin=getAreaXy(zz);
+                areaBegin=getAw(zz);
                 xfBegin=getXf(zz);
             }
-            areaEnd=getAreaXy(zz);
+            areaEnd=getAw(zz);
             xfEnd=getXf(zz);
 
-            sumArea+=getAreaXy(zz);
-            sumMyoz+=getAreaXy(zz)*getXf(zz);
-            sumMxoy+=i*getAreaXy(zz);      //此处getAreaXy(zz)可在FOR循环开始时统一计算；
+            volume2=areaEnd*zz;
+
+            sumArea+=getAw(zz);
+            sumMyoz+=getAw(zz)*getXf(zz);
+            sumMxoy+=i*getAw(zz);      //此处getAreaXy(zz)可在FOR循环开始时统一计算；
             i++;
         }
+
     if(i>1)
     {
     sumArea-=(areaBegin+areaEnd)/2;
@@ -552,7 +557,9 @@ void ship::calculateVolume(double zzz)
     double Myoz=(vZ[1]-vZ[0])*sumMyoz;
     double Mxoz=(vZ[1]-vZ[0])*(vZ[1]-vZ[0])*sumMxoy;
 
-    //if(Volume==0);
+    Cp=Volume/volume2;
+//    cerr<<"Cp"<<Cp<<endl;
+
     Xb=Myoz/Volume;
     Zb=Mxoz/Volume;
     }
@@ -563,20 +570,20 @@ void ship::calculateVolume(double zzz)
     }
 
     double Cb=Volume/(Lpp*B*zzz);
-    double Cp=Volume/(getAreaXy(zzz)*zzz);
+
     double Disp=omega*Volume;
 
     double Bm=0;
     for(sZValue pp : vIt)           //获取对应的It,用的多的话改成函数；
         if(pp.z==zzz)
-            Bm=pp.value/Volume;
+        Bm=pp.value/Volume;
 
     double Bml=0;
     for(sZValue pp : vIl)           //获取对应的It,用的多的话改成函数；
         if(pp.z==zzz)
-            Bml=(pp.value-getAreaXy(pp.z)*getXf(pp.z)*getXf(pp.z))/Volume;
-    double MTC=Volume*Bml/(100*Lpp);
+            Bml=(pp.value-getAw(pp.z)*getXf(pp.z)*getXf(pp.z))/Volume;
 
+    double MTC=Volume*Bml/(100*Lpp);
     sZValue p;
     p.z=zzz;
 
@@ -618,11 +625,10 @@ void ship::calculate(double xxx=-1,double zzz=-1)
 }
 */
 
-double ship::getAreaXy(double z)           //用常量引用
+double ship::getAw(double z)           //用常量引用
 {
     for(sZValue p : vAw)
         if(p.z==z)return p.value;
-return -1;
 /*
     calculateAreaXy(zzz);
     return Aw;
@@ -690,8 +696,8 @@ void ship::calculate()
     ////
     for(double z : vZ)
     {
-    calculateVolume(z);
     calculateAw(z);
+    calculateVolume(z);
     calCm(z);
     }
 /*    for(sZValue p : vAw)
