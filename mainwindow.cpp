@@ -106,3 +106,15 @@ void MainWindow::on_action_exit_triggered()
 {
     close();
 }
+
+void MainWindow::on_action_ExLP_triggered()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, tr("导出型线图绘图命令文件"), " ",
+                                                    tr("数据文件(*.txt)"));
+    ship1->exLinesPlan(fileName.toStdString());
+}
+
+void MainWindow::on_action_ExHC_triggered()
+{
+
+}

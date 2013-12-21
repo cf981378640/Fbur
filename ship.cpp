@@ -779,3 +779,56 @@ double ship::getBm(double zzz)
     //
 }
 */
+bool ship::exLinesPlan(string fileName)
+{
+    ofstream outFile(fileName.c_str(),ios_base::out);
+    if (outFile.is_open())
+    {
+        //复制的
+        for (sPoint p : vPoints)
+        {
+            double x=-1;
+            //double y=-1;
+            double z=-1;
+          if(p.x!=x){
+            vector<sPoint>sP=drawXZ(p.x);
+            outFile<<"spline\n";
+            for (sPoint p : sP)
+            {
+                outFile<<deltaL*(p.x-ma)<<","<<p.z<<"\n";
+            }
+/*
+            glBegin(GL_LINE_STRIP);
+            for (sPoint p : sP)
+            {
+                glVertex3f(GLfloat(p.x*deltaL- deltaL*ma)/Lpp*5,GLfloat(p.z)/Lpp*5,-GLfloat(p.y)/Lpp*5);
+            }
+            glEnd();
+
+            x=p.x;
+        }
+            if(p.z!=z){
+            vector<sPoint>sP=drawZX(p.z);
+            glBegin(GL_LINE_STRIP);
+            for (sPoint p : sP)
+            {
+                glVertex3f(GLfloat(p.x*deltaL- deltaL*ma)/Lpp*5,GLfloat(p.z)/Lpp*5,GLfloat(p.y)/Lpp*5);
+            }
+            glEnd();
+            glBegin(GL_LINE_STRIP);
+            for (sPoint p : sP)
+            {
+                glVertex3f(GLfloat(p.x*deltaL- deltaL*ma)/Lpp*5,GLfloat(p.z)/Lpp*5,-GLfloat(p.y)/Lpp*5);
+    //            cerr<<GLfloat(p.x*deltaL- deltaL*ma)/Lpp*5<<","<<GLfloat(p.z)/Lpp*5<<","<<-GLfloat(p.y)/Lpp*5;
+            }
+            glEnd();
+
+            z=p.z;
+        */
+          }
+        }
+    }
+
+    outFile.close();
+    return true;
+}

@@ -128,7 +128,8 @@ class ship
         ostringstream dOutput;
         bool bImport;
 
-    protected:
+        bool exLinesPlan(string fileName);
+protected:
         void importOffsets();
         void importPrinDim();
         void importAddPTrans();

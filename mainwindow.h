@@ -39,6 +39,10 @@ private slots:
 
     void on_action_exit_triggered();
 
+    void on_action_ExLP_triggered();
+
+    void on_action_ExHC_triggered();
+
 private:
     Ui::MainWindow *ui;
     ShipWidget *ship1;

@@ -41,7 +41,15 @@
     <property name="title">
      <string>文件(F)</string>
     </property>
+    <widget class="QMenu" name="menu">
+     <property name="title">
+      <string>导出</string>
+     </property>
+     <addaction name="action_ExLP"/>
+     <addaction name="action_ExHC"/>
+    </widget>
     <addaction name="action_import"/>
+    <addaction name="menu"/>
     <addaction name="separator"/>
     <addaction name="action_exit"/>
    </widget>
@@ -156,6 +164,16 @@
   <action name="action_exit">
    <property name="text">
     <string>退出</string>
+   </property>
+  </action>
+  <action name="action_ExLP">
+   <property name="text">
+    <string>型线图绘图命令</string>
+   </property>
+  </action>
+  <action name="action_ExHC">
+   <property name="text">
+    <string>静水力曲线绘图命令</string>
    </property>
   </action>
  </widget>
