@@ -41,7 +41,7 @@ MainWindow::~MainWindow()
 void MainWindow::on_action_import_triggered()
 {
     QMessageBox::StandardButton reply,reply2;
-    QString fileName;
+    QString fileName="未命名";
     while(reply!=QMessageBox::Yes||reply2!=QMessageBox::Yes)
     {
         fileName = QFileDialog::getOpenFileName(this, tr("导入数据文件"), " ",
@@ -88,16 +88,19 @@ void MainWindow::on_action_drawHyCur_triggered()
 
 void MainWindow::on_action_X_triggered()
 {
+    ship1->mode=1;
     ship1->lmode=1;
     ship1->updateGL();
 }
 void MainWindow::on_action_Y_triggered()
 {
+    ship1->mode=1;
     ship1->lmode=2;
     ship1->updateGL();
 }
 void MainWindow::on_action_Z_triggered()
 {
+    ship1->mode=1;
     ship1->lmode=3;
     ship1->updateGL();
 }
@@ -116,5 +119,7 @@ void MainWindow::on_action_ExLP_triggered()
 
 void MainWindow::on_action_ExHC_triggered()
 {
-
+    QString fileName = QFileDialog::getSaveFileName(this, tr("导出静水力曲线计算结果"), " ",
+                                                    tr("数据文件(*.txt)"));
+    ship1->exHyCurve(fileName.toStdString());
 }

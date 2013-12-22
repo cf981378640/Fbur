@@ -34,8 +34,9 @@ ship::ship()
     vCm.clear();          //中横剖面系数Cm**静水力曲线;
 
    Lpp=0,L0=0,d0=0,B=0,deltaL=0;
-   nX=0,nZ=0;
+   nX=0;
 
+   mZ=0;
    cx=m=n=ma=cs=cw=mw=nw=0;
    Xm=Lpp=Loa=B=Bw=deltaL=omega=f=0.0;
 
@@ -66,49 +67,86 @@ void ship::Init()
     vCwp.clear();         //水线面系数Cwp**静水力曲线;
     vCm.clear();          //中横剖面系数Cm**静水力曲线;
 
+    mZ=0;
    Lpp=0,L0=0,d0=0,B=0,deltaL=0;
-   nX=0,nZ=0;
+   nX=0;
 
    cx=m=n=ma=cs=cw=mw=nw=0;
    Xm=Lpp=Loa=B=Bw=deltaL=omega=f=0.0;
 }
 
-void ship::importPrinDim()
+bool ship::importPrinDim()
 {
     if(!inFile.eof())
     {
         iOutput<<"读入船舶主尺度及相关参数...\n";
         //此处应对数据做检查
-        inFile>>cx>>m>>n>>ma>>cs>>cw>>mw>>nw;
-//        iOutput<<cx<<"\t"<<m<<"\t"<<n<<"\t"<<ma<<"\t"<<cs<<"\t"<<cw<<"\t"<<mw<<"\t"<<nw<<endl;
-        inFile>>Xm>>Lpp>>Loa>>B>>Bw>>deltaL>>omega>>f>>O;
-//        iOutput<<xm<<"\t"<<lpp<<"\t"<<loa<<"\t"<<b<<"\t"<<bw<<"\t"<<deltaL<<"\t"<<omega<<"\t"<<h<<"\t"<<o<<endl;    
+        if(inFile>>cx>>m>>n>>ma>>cs>>cw>>mw>>nw)bImport=true;
+        else
+        {
+            bImport=false;
+            return false;
+        }
+        if(inFile>>Xm>>Lpp>>Loa>>B>>Bw>>deltaL>>omega>>f>>O)bImport=true;
+        return true;
     }
 }
-void ship::importOffsets()
+bool ship::importOffsets()
 {
-    iOutput<<"读入型值表...\n";
-    double temp=-1;
+    sPoint pPoint;
+    if(!bImport)return false;
+    string biaoshi;
+    if(inFile>>biaoshi)bImport=true;
+
     char ch;
     while (inFile>>ch)
         {
-        inFile.putback(ch);
-//        iOutput<<"ch:"<<ch<<endl;
-        if(ch=='C')break;
-        if(temp==0)break;
-        inFile>>pPoint.x;
+        inFile.unget();
 
+        //可以做成函数，检查非数字
+        bool nonum=false;
+        switch(ch)
+        {
+        case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': case '-':
+            break;
+        default :nonum=true;break;
+        }
+        if(nonum)break;
+        //结束
+
+        inFile>>pPoint.x;
         if(pPoint.x<0)
             for(int j=0;inFile.peek()!='\n';j++)
             {
+                //去空格及'\t'
+                inFile.get(ch);
+                while(ch==' '||ch=='\t')
+                    {
+                        inFile.get(ch);
+                    }
+                if(ch=='\n')break;
+                else inFile.putback(ch);
+                //去空格完成
+
+                double temp=-1;
                 inFile>>temp;
                 vZ.push_back(temp);
-                nZ++;
             }
         else
         {
             for(int j=0;inFile.peek()!='\n';j++)
             {
+                //去空格及'\t'
+                inFile.get(ch);
+                while(ch==' '||ch=='\t')
+                    {
+                        inFile.get(ch);
+                    }
+                if(ch=='\n')break;
+                else inFile.putback(ch);
+
+
+                double temp=-1;
                 inFile>>temp;
                 if(temp>=0)
                 {
@@ -120,25 +158,38 @@ void ship::importOffsets()
         }
     }
     vPoints2=vPoints;
+    bImport=true;
+    return true;
 }
 
-void ship::importAddPTrans()
+bool ship::importAddPTrans()
 {
+    if(!bImport)return false;
+    sPoint pPoint;
     char ch;
     string sch;
-    double temp=-1;
-    double temp1=-1;
     inFile>>sch;
-    if(sch=="CD")iOutput<<"读入横剖面插值点...\n";
-while (inFile>>ch)
+
+
+    while (inFile>>ch)
         {
         inFile.putback(ch);
-        if(ch=='C')break;
-        if(temp==0)break;
+
+        bool nonum=false;
+        switch(ch)
+        {
+        case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': case '-':
+            break;
+        default :nonum=true;break;
+        }
+        if(nonum)break;
+
         inFile>>pPoint.x;
 
             for(int j=0;inFile.peek()!='\n';j++)
             {
+
+                //去空格及'\t'
                 inFile.get(ch);
                 while(ch==' '||ch=='\t')
                     {
@@ -146,20 +197,29 @@ while (inFile>>ch)
                     }
                 if(ch=='\n')break;
                 else inFile.putback(ch);
+                //去空格及'\t'完成
+
+                double temp=-1;
+                double temp1=-1;
+
                 inFile>>temp>>temp1;
                 if(temp>=0)
                 {
                     pPoint.z=temp;
                     pPoint.y=temp1;
                     vPoints.push_back(pPoint);
-            }
-        }
-    }
+                }
+             }
+      }
+    return true;
 }
 
-void ship::importAddPWplane()
+bool ship::importAddPWplane()
 {
-    iOutput<<"读入水线面插值点...\n";
+    if(!bImport)return false;
+    sPoint pPoint;
+
+
     char ch;
     string sch;
     double temp=-1;
@@ -168,12 +228,23 @@ void ship::importAddPWplane()
 while (inFile>>ch)
         {
         inFile.putback(ch);
-        if(ch=='C')break;
-        if(temp==0)break;
+
+
+        bool nonum=false;
+        switch(ch)
+        {
+        case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': case '-':
+            break;
+        default :nonum=true;break;
+        }
+        if(nonum)break;
+
+
         inFile>>pPoint.z;
 
             for(int j=0;inFile.peek()!='\n';j++)
             {
+                //去空格
                 inFile.get(ch);
                 while(ch==' '||ch=='\t')
                     {
@@ -181,6 +252,8 @@ while (inFile>>ch)
                     }
                 if(ch=='\n')break;
                 else inFile.putback(ch);
+                //去空格
+
                 inFile>>temp>>temp1;
                 if(temp!=-1||temp1!=-1)
                 {
@@ -190,24 +263,21 @@ while (inFile>>ch)
             }
         }
     }
+   return true;
 }
 
 bool ship::import(string fileName)
 {
     inFile.open(fileName.c_str());
-    importPrinDim();
-    string biaoshi;
-    if((inFile>>biaoshi))
-    {
-        importOffsets();
-    }
-    importAddPTrans();
-    importAddPWplane();
+    if(!(importPrinDim()&&importOffsets()&&importAddPTrans()&&importAddPWplane()))
+        return false;
     inFile.close();
+    if(!bImport)return false;
 
     sort(vPoints.begin(),vPoints.end(),Cmp_by_X());
     vPoints.erase( unique( vPoints.begin(), vPoints.end() ), vPoints.end() );
 
+    mZ=*max_element(vZ.begin(),vZ.end());
     nX=2*Xm;
 //    cerr<<"站数："<<nX;
     return true;
@@ -225,18 +295,18 @@ vector<sPoint> ship::drawXZ(const double &x)
 
     return v;
 }
-
-vector<sPoint> ship::drawYX(const sPoint &s)
+/*
+vector<sPoint> ship::drawYZ(const sPoint &s)
 {
     //
     vector<sPoint> v;
     for (sPoint p : vPoints2)
         if(p.y==s.y)v.push_back(p);
-//    sort(v.begin(),v.end(),Cmp_by_Z());
+    sort(v.begin(),v.end(),Cmp_by_Z());
     return v;
 }
+*/
 
-/*
 vector<sPoint> ship::drawYX(const sPoint &s)
 {
     vector<sPoint> v;
@@ -252,7 +322,7 @@ vector<sPoint> ship::drawYX(const sPoint &s)
     v.insert(v.end(), u.begin(), u.end());
     return v;
 }
-*/
+
 
 vector<sPoint> ship::drawZX(const double &z)
 {
@@ -792,20 +862,35 @@ bool ship::exLinesPlan(string fileName)
     if (outFile.is_open())
     {
         //复制的
-        for (sPoint p : vPoints)
+        for (int i=0;i<2*Xm;i++)
         {
-          double x=-1;
-          if(p.x==x)continue;
-            x=p.x;
-            vector<sPoint>sP=drawXZ(p.x);
-
+            vector<sPoint>sP=drawXZ(i);
             outFile<<"spline\n";
             for (sPoint pp : sP)
             {
                 if(pp.x<ma)pp.y=-pp.y;
-                outFile<<pp.y<<","<<pp.z<<"\n";
+                outFile<<pp.y*1000<<","<<pp.z*1000<<"\n";
             }
             outFile<<"\n\n\n";
+        }
+
+        outFile<<"\n";
+        outFile<<"UCS "<<"\nM\n";
+        outFile<<0<<","<<-2*mZ*1000;
+        outFile<<"\n";
+        outFile<<"\n";
+
+
+        for (double z: vZ)
+        {
+            vector<sPoint>sP=drawZX(z);
+            outFile<<"spline\n";
+            for (sPoint pp : sP)
+            {
+                outFile<<(pp.x-ma)*deltaL*1000<<","<<pp.y*1000<<"\n";
+            }
+            outFile<<"\n\n\n";
+        }
 
 /*
             glBegin(GL_LINE_STRIP);
@@ -835,9 +920,141 @@ bool ship::exLinesPlan(string fileName)
 
             z=p.z;
         */
-        }
     }
 
+    outFile<<"\nz\n"<<"m\n";
     outFile.close();
     return true;
 }
+
+bool ship::exHyCurve(string fileName)
+{
+    ofstream outFile(fileName.c_str(),ios_base::out);
+    if (outFile.is_open())
+    {
+
+        outFile<<"\n-------------------------\n"
+                 "型排水体积V\n"
+                 "-------------------------\n";
+        outFile<<"z,体积\n";
+        for(sZValue p: vVolume)
+        {
+            outFile<<p.z<<","<<p.value<<"\n";
+        }
+
+        outFile<<"\n-------------------------\n"
+                 "总排水量\n"
+                 "-------------------------\n";
+        outFile<<"z,排水量\n";
+        for(sZValue p: vDisp)
+        {
+            outFile<<p.z<<","<<p.value<<"\n";
+        }
+
+        outFile<<"\n-------------------------\n"
+                 "浮心纵向坐标Xb\n"
+                 "-------------------------\n";
+        outFile<<"z,Xb\n";
+        for(sZValue p: vXb)
+        {
+            outFile<<p.z<<","<<(p.value-Xm)*deltaL<<"\n";
+        }
+
+        outFile<<"\n-------------------------\n"
+                 "浮心垂向坐标Zb\n"
+                 "-------------------------\n";
+        outFile<<"z,Zb\n";
+        for(sZValue p: vZb)
+        {
+            outFile<<p.z<<","<<p.value<<"\n";
+        }
+
+        outFile<<"\n-------------------------\n"
+                 "水线面面积Aw\n"
+                 "-------------------------\n";
+        outFile<<"z,Aw\n";
+        for(sZValue p: vAw)
+        {
+            outFile<<p.z<<","<<p.value<<"\n";
+        }
+        outFile<<"\n-------------------------\n"
+                 "漂心Xf\n"
+                 "-------------------------\n";
+        outFile<<"z,Xf\n";
+        for(sZValue p: vXf)
+        {
+            outFile<<p.z<<","<<p.value<<"\n";
+        }
+        outFile<<"\n-------------------------\n"
+                 "每厘米吃水吨数TPC\n"
+                 "-------------------------\n";
+        outFile<<"z,TPC\n";
+        for(sZValue p: vTPC)
+        {
+            outFile<<p.z<<","<<p.value<<"\n";
+        }
+        outFile<<"\n-------------------------\n"
+                 "横稳心半径BM\n"
+                 "-------------------------\n";
+        outFile<<"z,BM\n";
+        for(sZValue p: vBm)
+        {
+            outFile<<p.z<<","<<p.value<<"\n";
+        }
+        outFile<<"\n-------------------------\n"
+                 "纵稳心半径BML\n"
+                 "-------------------------\n";
+        outFile<<"z,BML\n";
+        for(sZValue p: vBml)
+        {
+            outFile<<p.z<<","<<p.value<<"\n";
+        }
+
+        outFile<<"\n-------------------------\n"
+                 "每厘米纵倾力矩MTC\n"
+                 "-------------------------\n";
+        outFile<<"z,MTC\n";
+        for(sZValue p: vMTC)
+        {
+            outFile<<p.z<<","<<p.value<<"\n";
+        }
+
+        outFile<<"\n-------------------------\n"
+                 "水线面系数Cwp\n"
+                 "-------------------------\n";
+        outFile<<"z,Cwp\n";
+        for(sZValue p: vCwp)
+        {
+            outFile<<p.z<<","<<p.value<<"\n";
+        }
+
+        outFile<<"\n-------------------------\n"
+                 "中横剖面系数Cm\n"
+                 "-------------------------\n";
+        outFile<<"z,Cm\n";
+        for(sZValue p: vCwp)
+        {
+            outFile<<p.z<<","<<p.value<<"\n";
+        }
+
+        outFile<<"\n-------------------------\n"
+                 "方形系数Cb\n"
+                 "-------------------------\n";
+        outFile<<"z,Cb\n";
+        for(sZValue p: vCb)
+        {
+            outFile<<p.z<<","<<p.value<<"\n";
+        }
+
+
+        outFile<<"\n-------------------------\n"
+                 "棱形系数Cp\n"
+                 "-------------------------\n";
+        outFile<<"z,Cwp\n";
+        for(sZValue p: vCp)
+        {
+            outFile<<p.z<<","<<p.value<<"\n";
+        }
+    }
+}
+

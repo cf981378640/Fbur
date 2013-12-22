@@ -12,13 +12,14 @@ struct sPoint
     double x;
     double y;
     double z;
-/*    sPoint(const sPoint& p)
+    sPoint():x(0),y(0),z(0){}
+    sPoint(const sPoint& p)
     {
         x=p.x;
         y=p.y;
         z=p.z;
     }
-*/
+
     bool operator==( const sPoint& sP ) const
     {
         return x == sP.x&&y == sP.y&&z == sP.z;
@@ -59,6 +60,7 @@ struct sZValue            //静水力曲线中的（z,value）
 
 class Wwrong{};
 
+
 class ship
 {
     public:
@@ -69,8 +71,9 @@ class ship
         bool import(string fileName);
 
         vector<sPoint> drawXZ(const double &x);            //返回某站的点，按Z排序;
-        vector<sPoint> drawYX(const sPoint &s);            //返回某站的点，按X排序;
+        vector<sPoint> drawYZ(const sPoint &s);            //返回某站的点，按X排序;
         vector<sPoint> drawZX(const double &z);            //返回某水线面的点，按x排序;
+        vector<sPoint> drawYX(const sPoint &s);
 
 
 /*
@@ -133,11 +136,12 @@ class ship
         bool bImport;
 
         bool exLinesPlan(string fileName);
+        bool exHyCurve(string fileName);
 protected:
-        void importOffsets();
-        void importPrinDim();
-        void importAddPTrans();
-        void importAddPWplane();
+        bool importOffsets();
+        bool importPrinDim();
+        bool importAddPTrans();
+        bool importAddPWplane();
 
         void calculate(double xxx,double zzz);
         void calculateAw(double zzz);
@@ -145,7 +149,6 @@ protected:
         void calculateVolume(double zzz);
 
         void Init();
-
 
         int cx,m,n,ma,cs,cw,mw,nw;
         //依次为 cx-船舶类型 m-计算横剖面数 n-计算水线数 ma-最大横剖面所在序号
@@ -167,10 +170,10 @@ protected:
 
 //        double Bm,MTC,Bml;
 
-        double d;
+        double mZ;
         double As,Moy,Moyy;   //Aw-水线面面积，As-横剖面面积，Xf-漂心纵向坐标，Xb-浮心纵向坐标，cWP水线面系数，Moy-水线面对船舯的面矩
         double L0,d0;  //L-垂线间长,L0-0站以后部分长度，d0-0站以后部分形心到0站距离
-        int nX,nZ;             //nX-站数
+        int nX;             //nX-站数
 
         vector<double> vZ;
         sPoint pPoint;

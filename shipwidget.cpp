@@ -137,8 +137,10 @@ void ShipWidget::drawLinesPlan()
     for (sPoint p : vPoints)
     {
         double x=-1;
-        //double y=-1;
+        double y=-1;
         double z=-1;
+
+
       if(p.x!=x){
         vector<sPoint>sP=drawXZ(p.x);
         glBegin(GL_LINE_STRIP);
@@ -174,7 +176,8 @@ void ShipWidget::drawLinesPlan()
 
         z=p.z;
     }
-/*
+
+        /*
         if(p.y!=y){
         vector<sPoint>sP=drawYX(p);
         glBegin(GL_LINE_STRIP);
@@ -250,8 +253,6 @@ void ShipWidget::drawHyCur()
 
 void ShipWidget::drawAxes()
 {
-   double mZ=*max_element(vZ.begin(),vZ.end());
-
    glBegin(GL_LINES);
    for(double i=0;i<Xm*2;i++)   //纵轴
    {
