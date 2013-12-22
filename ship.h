@@ -19,6 +19,10 @@ struct sPoint
         z=p.z;
     }
 */
+    bool operator==( const sPoint& sP ) const
+    {
+        return x == sP.x&&y == sP.y&&z == sP.z;
+    }
 };
 
 struct Cmp_by_X

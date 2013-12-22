@@ -204,6 +204,10 @@ bool ship::import(string fileName)
     importAddPTrans();
     importAddPWplane();
     inFile.close();
+
+    sort(vPoints.begin(),vPoints.end(),Cmp_by_X());
+    vPoints.erase( unique( vPoints.begin(), vPoints.end() ), vPoints.end() );
+
     nX=2*Xm;
 //    cerr<<"站数："<<nX;
     return true;
@@ -217,6 +221,8 @@ vector<sPoint> ship::drawXZ(const double &x)
     for (sPoint p : vPoints)
         if(p.x==x)v.push_back(p);
     sort(v.begin(),v.end(),Cmp_by_Y());
+    v.erase( unique( v.begin(), v.end() ), v.end() );
+
     return v;
 }
 
@@ -254,6 +260,7 @@ vector<sPoint> ship::drawZX(const double &z)
     for (sPoint p : vPoints)
         if(p.z==z)v.push_back(p);
     sort(v.begin(),v.end(),Cmp_by_X());
+    v.erase( unique( v.begin(), v.end() ), v.end() );
     return v;
 }
 
@@ -787,16 +794,19 @@ bool ship::exLinesPlan(string fileName)
         //复制的
         for (sPoint p : vPoints)
         {
-            double x=-1;
-            //double y=-1;
-            double z=-1;
-          if(p.x!=x){
+          double x=-1;
+          if(p.x==x)continue;
+            x=p.x;
             vector<sPoint>sP=drawXZ(p.x);
+
             outFile<<"spline\n";
-            for (sPoint p : sP)
+            for (sPoint pp : sP)
             {
-                outFile<<deltaL*(p.x-ma)<<","<<p.z<<"\n";
+                if(pp.x<ma)pp.y=-pp.y;
+                outFile<<pp.y<<","<<pp.z<<"\n";
             }
+            outFile<<"\n\n\n";
+
 /*
             glBegin(GL_LINE_STRIP);
             for (sPoint p : sP)
@@ -825,7 +835,6 @@ bool ship::exLinesPlan(string fileName)
 
             z=p.z;
         */
-          }
         }
     }
 
