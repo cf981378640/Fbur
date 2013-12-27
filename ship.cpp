@@ -488,7 +488,7 @@ void ship::calculateAs(double xxx,double zzz)
     sumMoyy-=i*pEnd.y/2;
     As=2*deltaZ*deltaZ*sumY;
     Moyy=2*deltaZ*deltaZ*sumMoyy;
-    cout<<deltaZ<<endl;
+//    cout<<deltaZ<<endl;
 }
 
 /*
@@ -594,52 +594,34 @@ void ship::calculateVolume(double zzz)            使用纵向计算法
 
 void ship::calculateVolume(double zzz)
 {
-    int i=0;
     double Xb=0,Zb=0;
-    double Volume=0;
-    double sumArea=0,sumMyoz=0,sumMxoy=0;
-    double areaBegin,areaEnd,xfBegin=0,xfEnd=0;           //之后做优化
-
+    double Volume=0,Myoz=0,Mxoy=0;
+    double oldAw=-1,oldXf=-1,oldZ=-1;           //之后做优化
     double Cp=0;
     double Zvolume=0;
     for (double zz : vZ)
         {
             if(zzz!=-1&&zz>zzz)break;
-            if(i==0)
+            if(oldZ!=-1)
             {
-                areaBegin=getAw(zz);
-                xfBegin=getXf(zz);
+                Volume+=(oldAw+getAw(zz))*(zz-oldZ);
+                Myoz+=(oldXf*oldAw+getXf(zz)*getAw(zz))*(zz-oldZ);
+                Mxoy+=(oldZ*oldAw+zz*getAw(zz))*(zz-oldZ);
             }
-            areaEnd=getAw(zz);
-            xfEnd=getXf(zz);
-
-            Zvolume=areaEnd*zz;
-
-            sumArea+=getAw(zz);
-            sumMyoz+=getAw(zz)*getXf(zz);
-            sumMxoy+=i*getAw(zz);      //此处getAreaXy(zz)可在FOR循环开始时统一计算；
-            i++;
+            oldZ=zz;
+            oldAw=getAw(zz);
+            oldXf=getXf(zz);
         }
+    Volume/=2;
+    Myoz/=2;
+    Mxoy/=2;
 
-    if(i>1)
-    {
-    sumArea-=(areaBegin+areaEnd)/2;
-    sumMyoz-=(areaEnd*xfEnd+areaBegin*xfBegin)/2;
-    sumMxoy-=i*areaEnd/2;
-
-    Volume=(vZ[1]-vZ[0])*sumArea;
-    double Myoz=(vZ[1]-vZ[0])*sumMyoz;
-    double Mxoz=(vZ[1]-vZ[0])*(vZ[1]-vZ[0])*sumMxoy;
+    Zvolume=oldAw*oldZ;
 
     Cp=Volume/Zvolume;
     Xb=Myoz/Volume;
-    Zb=Mxoz/Volume;
-    }
-    else
-    {
-        Volume=0;
-        Xb=Xm;
-    }
+    Zb=Mxoy/Volume;
+
 
     double Cb=Volume/(Lpp*B*zzz);
 
