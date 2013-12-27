@@ -53,17 +53,6 @@
     <addaction name="separator"/>
     <addaction name="action_exit"/>
    </widget>
-   <widget class="QMenu" name="menu_3">
-    <property name="title">
-     <string>编辑(H)</string>
-    </property>
-   </widget>
-   <widget class="QMenu" name="menu_4">
-    <property name="title">
-     <string>数据(S)</string>
-    </property>
-    <addaction name="action_calculate"/>
-   </widget>
    <widget class="QMenu" name="menu_5">
     <property name="title">
      <string>视图(V)</string>
@@ -84,9 +73,7 @@
     <addaction name="action_drawHyCur"/>
    </widget>
    <addaction name="menu_2"/>
-   <addaction name="menu_3"/>
    <addaction name="menu_5"/>
-   <addaction name="menu_4"/>
    <addaction name="menu_help"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>

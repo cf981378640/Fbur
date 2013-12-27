@@ -38,7 +38,7 @@ ship::ship()
 
    mZ=0;
    cx=m=n=ma=cs=cw=mw=nw=0;
-   Xm=Lpp=Loa=B=Bw=deltaL=omega=f=0.0;
+   Xm=Lpp=Loa=B=Bw=deltaL=omega=f=O=0.0;
 
 }
 
@@ -115,7 +115,7 @@ bool ship::importOffsets()
         //结束
 
         inFile>>pPoint.x;
-        if(pPoint.x<0)
+        if(pPoint.x==-1)
             for(int j=0;inFile.peek()!='\n';j++)
             {
                 //去空格及'\t'
@@ -229,7 +229,6 @@ while (inFile>>ch)
         {
         inFile.putback(ch);
 
-
         bool nonum=false;
         switch(ch)
         {
@@ -311,7 +310,7 @@ vector<sPoint> ship::drawYX(const sPoint &s)
 {
     vector<sPoint> v;
     vector<sPoint> u;
-    for (sPoint p : vPoints2)
+    for (sPoint p : vPoints)
         if(p.y==s.y)
         {
             if(p.x<ma)v.push_back(p);
@@ -420,14 +419,13 @@ void ship::calculateAw(double zzz)            //改用梯形法（有些站没�
 {
     double sumAw=0,sumMoy=0,sumIt=0,sumIl=0;
     double xx=-1,yy=-1;
-    for (sPoint p : vPoints2)
+    for (sPoint p : vPoints)
         {
-            if (p.z-zzz>-0.00001&&p.z-zzz<0.00001)  //0.000001改用 const 常量
+            if (p.z==zzz)
             {
-
                 if(xx!=-1)
                 {
-                    sumAw+=(p.y+yy)*(p.x-xx)/2.0;
+                    sumAw+=(p.y+yy)*(p.x-xx);
                     sumMoy+=(p.x*p.y+xx*yy)*(p.x-xx)/2.0;
                     sumIt+=(p.y*p.y*p.y+yy*yy*yy)*(p.x-xx)/2.0;
                     sumIl+=(p.x*p.x*p.y+xx*xx*yy)*(p.x-xx)/2.0;
@@ -437,7 +435,7 @@ void ship::calculateAw(double zzz)            //改用梯形法（有些站没�
             }
         }
 
-    double Aw=2.0*sumAw;            //水线面面积Aw
+    double Aw=sumAw*deltaL;            //水线面面积Aw
     double Moy=2.0*sumMoy;         //水线面对OY轴静矩Moy
     double It=sumIt*2.0/3.0;       //水线面的横向惯性矩
     double Il=2.0*sumIl;           //水线面的横向惯性矩
@@ -603,11 +601,10 @@ void ship::calculateVolume(double zzz)
     double areaBegin,areaEnd,xfBegin=0,xfEnd=0;           //之后做优化
 
     double Cp=0;
-    double volume2=0;
+    double Zvolume=0;
     for (double zz : vZ)
         {
-            if(zzz!=-1&&zz-0.0001>zzz)break;
- //           cout<<zz<<"\t";
+            if(zzz!=-1&&zz>zzz)break;
             if(i==0)
             {
                 areaBegin=getAw(zz);
@@ -616,7 +613,7 @@ void ship::calculateVolume(double zzz)
             areaEnd=getAw(zz);
             xfEnd=getXf(zz);
 
-            volume2=areaEnd*zz;
+            Zvolume=areaEnd*zz;
 
             sumArea+=getAw(zz);
             sumMyoz+=getAw(zz)*getXf(zz);
@@ -634,16 +631,14 @@ void ship::calculateVolume(double zzz)
     double Myoz=(vZ[1]-vZ[0])*sumMyoz;
     double Mxoz=(vZ[1]-vZ[0])*(vZ[1]-vZ[0])*sumMxoy;
 
-    Cp=Volume/volume2;
-//    cerr<<"Cp"<<Cp<<endl;
-
+    Cp=Volume/Zvolume;
     Xb=Myoz/Volume;
     Zb=Mxoz/Volume;
     }
     else
     {
         Volume=0;
-        Xb=0;
+        Xb=Xm;
     }
 
     double Cb=Volume/(Lpp*B*zzz);
@@ -869,17 +864,12 @@ bool ship::exLinesPlan(string fileName)
             for (sPoint pp : sP)
             {
                 if(pp.x<ma)pp.y=-pp.y;
-                outFile<<pp.y*1000<<","<<pp.z*1000<<"\n";
+                outFile<<pp.y*1000<<","<<(pp.z+2*mZ)*1000<<"\n";
             }
-            outFile<<"\n\n\n";
+            outFile<<" \n \n \n ";
         }
 
-        outFile<<"\n";
-        outFile<<"UCS "<<"\nM\n";
-        outFile<<0<<","<<-2*mZ*1000;
-        outFile<<"\n";
-        outFile<<"\n";
-
+        outFile<<" \n";
 
         for (double z: vZ)
         {
@@ -889,40 +879,11 @@ bool ship::exLinesPlan(string fileName)
             {
                 outFile<<(pp.x-ma)*deltaL*1000<<","<<pp.y*1000<<"\n";
             }
-            outFile<<"\n\n\n";
+            outFile<<"  \n  \n  \n";
         }
-
-/*
-            glBegin(GL_LINE_STRIP);
-            for (sPoint p : sP)
-            {
-                glVertex3f(GLfloat(p.x*deltaL- deltaL*ma)/Lpp*5,GLfloat(p.z)/Lpp*5,-GLfloat(p.y)/Lpp*5);
-            }
-            glEnd();
-
-            x=p.x;
-        }
-            if(p.z!=z){
-            vector<sPoint>sP=drawZX(p.z);
-            glBegin(GL_LINE_STRIP);
-            for (sPoint p : sP)
-            {
-                glVertex3f(GLfloat(p.x*deltaL- deltaL*ma)/Lpp*5,GLfloat(p.z)/Lpp*5,GLfloat(p.y)/Lpp*5);
-            }
-            glEnd();
-            glBegin(GL_LINE_STRIP);
-            for (sPoint p : sP)
-            {
-                glVertex3f(GLfloat(p.x*deltaL- deltaL*ma)/Lpp*5,GLfloat(p.z)/Lpp*5,-GLfloat(p.y)/Lpp*5);
-    //            cerr<<GLfloat(p.x*deltaL- deltaL*ma)/Lpp*5<<","<<GLfloat(p.z)/Lpp*5<<","<<-GLfloat(p.y)/Lpp*5;
-            }
-            glEnd();
-
-            z=p.z;
-        */
     }
 
-    outFile<<"\nz\n"<<"m\n";
+    outFile<<" \nz \n"<<"a \n ";
     outFile.close();
     return true;
 }

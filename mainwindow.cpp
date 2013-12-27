@@ -55,7 +55,7 @@ void MainWindow::on_action_import_triggered()
         reply2 =QMessageBox::question(this,"确认数据！",info2,QMessageBox::Yes|QMessageBox::No);
     }
 
-    setWindowTitle(fileName+" - Fbur");
+    setWindowTitle(QFileInfo(fileName).fileName()+" - Fbur");
     ship1->calculate();
 }
 
