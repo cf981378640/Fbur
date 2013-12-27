@@ -13,6 +13,7 @@ struct sPoint
     double y;
     double z;
     sPoint():x(0),y(0),z(0){}
+    sPoint(double x,double y,double z):x(x),y(y),z(z){}
     sPoint(const sPoint& p)
     {
         x=p.x;
@@ -58,7 +59,7 @@ struct sZValue            //静水力曲线中的（z,value）
     double value;
 };
 
-class Wwrong{};
+class importError{};
 
 
 class ship
@@ -133,7 +134,6 @@ class ship
         ostringstream iOutput;
         ostringstream cOutput;
         ostringstream dOutput;
-        bool bImport;
 
         bool exLinesPlan(string fileName);
         bool exHyCurve(string fileName);
@@ -176,9 +176,7 @@ protected:
         int nX;             //nX-站数
 
         vector<double> vZ;
-        sPoint pPoint;
         vector<sPoint> vPoints;
-        vector<sPoint> vPoints2;
 
         vector<sZValue> vZb;                 //浮心垂向坐标Zb**静水力曲线;
         vector<sZValue> vBm;     //**        //横稳心半径Bm**静水力曲线;

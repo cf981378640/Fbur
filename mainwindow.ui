@@ -45,6 +45,10 @@
      <property name="title">
       <string>导出</string>
      </property>
+     <property name="icon">
+      <iconset resource="resource.qrc">
+       <normaloff>:/ico/images/floppy.png</normaloff>:/ico/images/floppy.png</iconset>
+     </property>
      <addaction name="action_ExLP"/>
      <addaction name="action_ExHC"/>
     </widget>
@@ -107,11 +111,6 @@
     <string>导入</string>
    </property>
   </action>
-  <action name="action_calculate">
-   <property name="text">
-    <string>整体参数</string>
-   </property>
-  </action>
   <action name="action_drawHyCur">
    <property name="icon">
     <iconset resource="resource.qrc">
@@ -149,18 +148,30 @@
    </property>
   </action>
   <action name="action_exit">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/ico/images/f08b.png</normaloff>:/ico/images/f08b.png</iconset>
+   </property>
    <property name="text">
     <string>退出</string>
    </property>
   </action>
   <action name="action_ExLP">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/ico/images/floppy.png</normaloff>:/ico/images/floppy.png</iconset>
+   </property>
    <property name="text">
     <string>型线图绘图命令</string>
    </property>
   </action>
   <action name="action_ExHC">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/ico/images/floppy.png</normaloff>:/ico/images/floppy.png</iconset>
+   </property>
    <property name="text">
-    <string>静水力曲线绘图命令</string>
+    <string>静水力曲线计算结果</string>
    </property>
   </action>
  </widget>
