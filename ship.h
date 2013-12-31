@@ -135,8 +135,9 @@ public:
     ostringstream cOutput;
     ostringstream dOutput;
 
-    bool exLinesPlan(string fileName);
-    bool exHyCurve(string fileName);
+    bool exLinesPlan(const string &fileName);
+    bool exHyCurve(const string &fileName);
+    bool ExBC(const string &fileName);
 protected:
     bool importOffsets();
     bool importPrinDim();
@@ -145,7 +146,7 @@ protected:
 
     void calculate(double xxx,double zzz);
     void calculateAw(double zzz);
-    void calculateAs(double xxx,double zzz);
+    void calculateAs(double xx, double zz);
     void calculateVolume(double zzz);
 
     void Init();
@@ -168,7 +169,6 @@ protected:
     //o:  设计纵倾(m)
 
     double mZ;
-    double As,AsY,Moy,Moyy;   //Aw-水线面面积，As-横剖面面积，Xf-漂心纵向坐标，Xb-浮心纵向坐标，cWP水线面系数，Moy-水线面对船舯的面矩
     double L0,d0;  //L-垂线间长,L0-0站以后部分长度，d0-0站以后部分形心到0站距离
     int nX;             //nX-站数
 
@@ -194,6 +194,9 @@ protected:
     vector<sZValue> vIt;                 //水线面的横向惯性矩--用于计算横稳心;
     vector<sZValue> vIlf;                //水线面的纵向惯性矩（对于漂心横轴）--用于计算纵稳心;
     vector<sZValue> vIl;                 //水线面的纵向惯性矩（对于中站横轴）--用于计算Ilf;
+
+    vector<sPoint> vAs;
+    vector<sPoint> vMoyy;
 };
 
 #endif // SHIP_H

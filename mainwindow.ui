@@ -51,6 +51,7 @@
      </property>
      <addaction name="action_ExLP"/>
      <addaction name="action_ExHC"/>
+     <addaction name="action_ExBC"/>
     </widget>
     <addaction name="action_import"/>
     <addaction name="menu"/>
@@ -172,6 +173,11 @@
    </property>
    <property name="text">
     <string>静水力曲线计算结果</string>
+   </property>
+  </action>
+  <action name="action_ExBC">
+   <property name="text">
+    <string>邦戎曲线</string>
    </property>
   </action>
  </widget>

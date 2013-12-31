@@ -52,8 +52,8 @@ bool ship::importPrinDim()
         //此处应对数据做检查
         if(!(inFile>>cx>>m>>n>>ma>>cs>>cw>>mw>>nw)||!(inFile>>Xm>>Lpp>>Loa>>B>>Bw>>deltaL>>omega>>f>>O))
             throw importError();
-        return true;
     }
+    return true;
 }
 bool ship::importOffsets()
 {
@@ -213,7 +213,6 @@ bool ship::import(string fileName)
     return true;
 }
 
-
 vector<sPoint> ship::drawXZ(const double &x)
 {
     //
@@ -225,7 +224,6 @@ vector<sPoint> ship::drawXZ(const double &x)
 
     return v;
 }
-
 
 vector<sPoint> ship::drawYZ(const sPoint &s)
 {
@@ -301,19 +299,40 @@ void ship::calculateAw(double zzz)            //改用梯形法（有些站没�
 
 void ship::calculateAs(double xxx,double zzz)
 {
-    As=0,Moyy=0;    //sumMoyy用于画邦戎曲线
-    AsY=-1;
+    double As=0;
+    double Moyy=0;    //sumMoyy用于画邦戎曲线
+    double y=-1;
     double zz=-1;
     for (sPoint p : drawXZ(xxx))
     {
         if(zzz!=-1&&p.z>zzz)break;
         if(zz!=-1)
         {
-            As+=(p.y+AsY)*(p.z-zz);
-            Moyy+=(p.z*p.y+zz*AsY)*(p.z-zz);
+            As+=(p.y+y)*(p.z-zz);
+            Moyy+=(p.z*p.y+zz*y)*(p.z-zz);
         }
         zz=p.z;
-        AsY=p.y;
+        y=p.y;
+    }
+    sPoint as;
+    as.x=xxx;
+    as.z=zzz;
+    as.y=As;
+    vAs.push_back(as);
+    sort(vAs.begin(),vAs.end(),Cmp_by_Xz());
+
+    sPoint moyy=as;
+    moyy.y=Moyy;
+    vMoyy.push_back(moyy);
+    sort(vMoyy.begin(),vMoyy.end(),Cmp_by_Xz());
+
+    if(xxx==ma){
+        double Cm=As/(y*zzz*2);
+        sZValue p;
+        p.z=zzz;
+        p.value=Cm;
+        //    cerr<<"Cm"<<Cm<<","<<endl;
+        vCm.push_back(p);
     }
 }
 
@@ -415,16 +434,7 @@ double ship::getAw(double z)           //用常量引用
 {
     for(sZValue p : vAw)
         if(p.z==z)return p.value;
-}
-
-double ship::getAs(double x,double z)
-{
-    calculateAs(x,z);
-    return As;
-}
-double ship::getAs(double xxx)
-{
-    return getAs(xxx,-1);
+    return -1;
 }
 
 double ship::getXf(double z)
@@ -454,27 +464,13 @@ void ship::calculate()
     {
         calculateAw(z);
         calculateVolume(z);
-        calCm(z);
     }
-    /*    for(sZValue p : vAw)
-        cerr<<"vAw:"<<p.z<<","<<p.value<<endl;
-*/
+    for(sPoint p : vPoints)
+        calculateAs(p.x,p.z);
 }
 
 
-void ship::calCm(double zzz)
-{
-    calculateAs(ma,zzz);
-    double Cm=As/(AsY*zzz);
-    sZValue p;
-    p.z=zzz;
-    p.value=Cm;
-    //    cerr<<"Cm"<<Cm<<","<<endl;
-    vCm.push_back(p);
-}
-
-
-bool ship::exLinesPlan(string fileName)
+bool ship::exLinesPlan(const string &fileName)
 {
     ofstream outFile(fileName.c_str(),ios_base::out);
     if (outFile.is_open())
@@ -505,7 +501,7 @@ bool ship::exLinesPlan(string fileName)
             outFile<<"  \n  \n  \n";
         }
 
-/*
+        /*
         double y=0;
         for (sPoint p: vPoints)
         {
@@ -522,7 +518,6 @@ bool ship::exLinesPlan(string fileName)
             y=p.y;
         }
 */
-
 
         for (int i=0;i<2*Xm+1;i++)
         {
@@ -576,7 +571,7 @@ bool ship::exLinesPlan(string fileName)
     return true;
 }
 
-bool ship::exHyCurve(string fileName)
+bool ship::exHyCurve(const string &fileName)
 {
     ofstream outFile(fileName.c_str(),ios_base::out);
     if (outFile.is_open())
@@ -681,7 +676,7 @@ bool ship::exHyCurve(string fileName)
                  "中横剖面系数Cm\n"
                  "-------------------------\n";
         outFile<<"z,Cm\n";
-        for(sZValue p: vCwp)
+        for(sZValue p: vCm)
         {
             outFile<<p.z<<","<<p.value<<"\n";
         }
@@ -704,6 +699,45 @@ bool ship::exHyCurve(string fileName)
         {
             outFile<<p.z<<","<<p.value<<"\n";
         }
+    }
+    return true;
+}
+
+bool ship::ExBC(const string &fileName)
+{
+    ofstream outFile(fileName.c_str(),ios_base::out);
+    if (outFile.is_open())
+    {
+        double x=-1;
+        for(sPoint As : vAs)
+        {
+            if(x!=As.x)
+                outFile<<" \nspline\n";
+            outFile<<(As.y/4+As.x*5)*1000<<","<<As.z*5000<<"\n";
+            x=As.x;
+        }
+        for(sPoint moyy : vMoyy)
+        {
+            if(x!=moyy.x)
+                outFile<<" \n \nspline\n";
+            outFile<<(moyy.y/4+moyy.x*5)*1000<<","<<moyy.z*5000<<"\n";
+            x=moyy.x;
+        }
+        outFile<<"zoom\na \n\n";
+
+
+/*
+        for(sPoint As : vAs)
+        {
+            double x=-1;
+            if(x==-1||As.x==x)
+            {
+                calculateAs(x,p.z);
+            }
+            x=p.x;
+        }
+*/
+
     }
     return true;
 }

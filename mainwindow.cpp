@@ -124,3 +124,10 @@ void MainWindow::on_action_ExHC_triggered()
                                                     tr("数据文件(*.txt)"));
     ship1->exHyCurve(fileName.toStdString());
 }
+
+void MainWindow::on_action_ExBC_triggered()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, tr("导出静水力曲线计算结果"), " ",
+                                                    tr("数据文件(*.txt)"));
+    ship1->ExBC(fileName.toStdString());
+}
