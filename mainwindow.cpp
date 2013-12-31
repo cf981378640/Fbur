@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete ship1;
 }
 
 
@@ -48,7 +49,7 @@ void MainWindow::on_action_import_triggered()
                                                         tr("数据文件(*.txt)"));
         if(fileName.isEmpty())break;
         ship1->Init();
-        ship1->import(fileName.toStdString());
+        ship1->import(fileName.toStdString().data());
         QString info="请确认以下参数的正确性：\n"+("\n船舶类型:\t"+QString::number(ship1->cx)+"\n计算横剖面数:\t"+QString::number(ship1->m)+"\n计算水线数:\t"+QString::number(ship1->n)+"\n最大横剖面站号:\t"+QString::number(ship1->ma)+"\n横剖面插入点数:\t"+QString::number(ship1->cs)+"\n水线面插入点数\t"+QString::number(ship1->cw)+"\n有涡尾横剖面站数:\t"+QString::number(ship1->mw)+"\n有涡尾水线根数:\t"+QString::number(ship1->nw));
         QString info2="请确认以下参数的正确性：\n"+("\n船舯站号:\t"+QString::number(ship1->Xm)+"\n垂线间长:\t"+QString::number(ship1->Lpp)+"\n最 大 长:   \t"+QString::number(ship1->Loa)+"\n型     宽:    \t"+QString::number(ship1->B)+"\n设计水线宽:\t"+QString::number(ship1->Bw)+"\n标准站距:\t"+QString::number(ship1->deltaL)+"\n水的重度:\t"+QString::number(ship1->omega)+"\n甲板梁拱:\t"+QString::number(ship1->f)+"\n设计纵倾:\t"+QString::number(ship1->O));
         reply =QMessageBox::question(this,"确认数据！",info,QMessageBox::Yes|QMessageBox::No);
@@ -72,7 +73,7 @@ void MainWindow::on_action_Fbur_triggered()
 void MainWindow::on_action_Fubowen_triggered()
 {
     QString aboutF=" <h1>关于作者</h1><p>\t出乎我的意料，真的有人想要了解提供这款软件给我们的到底是什么人。那么我还是先简单讲讲Fbur的开发过程。</p>"
-            "<p>\t软件编写于作者的大三学年，2013年。当时刚完成船舶静力学的课程不久，为我们授课的姜大奎老师开始鼓励我们编写自己专业的小软件。这实在是一个很有意思的想法，让我颇为心动。其后我开始频频出现在校图书馆的流通书库。感谢校图书馆提供了如此丰富的资源供我参考。其中对我影响较大的有C++之父的《C++程序设计原理与实践》及《C++ GUI Qt 4编程》及《交互式计算机图形学》。</p>"
+            "<p>\t软件编写于作者的大三学年，2013年。当时刚完成船舶静力学的课程不久，为我们授课的姜大奎老师开始鼓励我们编写自己专业的小软件。这实在是一个很有意思的想法，让我颇为心动。其后我开始频频出现在校图书馆的流通书库。感谢校图书馆提供了如此丰富的资源供我参考。其中对我影响较大的有C++之父的《C++程序设计原理与实践》及《C++ GUI Qt 4编程》。</p>"
             "<p>\t其后即疯狂地编写代码，先是写底层的各计算部分，计算部分大体完成后开始借用图形界面库Qt编写界面，另由出色的openGL完成三维图形的绘制。</p>"
             "<p>\t怎么说呢，编程实在是一件像玩网络游戏一样让人“上瘾的”事情，难以想象的，它们之间竟有如此多的共性！是的，那一堆代码会让你没日没夜地黏在计算机屏幕前面，还是不是要咒骂上几声！</p>"
             "<p>\t好在，那样的日子终于过去了，Fbur带来的最终是甜蜜！</p>"

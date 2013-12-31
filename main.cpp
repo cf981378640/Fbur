@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     QDateTime now;
     MainWindow w;
     splash->show();
-    Sleep(3000);
+    Sleep(1500);
 
     w.show();
     splash->finish(&w);
@@ -28,6 +28,11 @@ int main(int argc, char *argv[])
     {
         QMessageBox::critical(0, "错误", "文本格式错误");
     }
+    catch(std::bad_alloc)
+    {
+        QMessageBox::critical(0, "错误", "内存泄露");
+    }
+
     catch(...)
     {
         QMessageBox::critical(0, "错误", "未知错误");

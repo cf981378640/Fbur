@@ -137,9 +137,7 @@ void ShipWidget::drawLinesPlan()
     for (sPoint p : vPoints)
     {
         double x=-1;
-        double y=-1;
         double z=-1;
-
 
       if(p.x!=x){
         vector<sPoint>sP=drawXZ(p.x);
@@ -176,45 +174,8 @@ void ShipWidget::drawLinesPlan()
 
         z=p.z;
     }
+}
 
-        /*
-        if(p.y!=y){
-        vector<sPoint>sP=drawYX(p);
-        glBegin(GL_LINE_STRIP);
-        for (sPoint p : sP)
-        {
-            glVertex3f(GLfloat(p.x*deltaL- deltaL*ma)/Lpp*5,GLfloat(p.z)/Lpp*5,GLfloat(p.y)/Lpp*5);
-        }
-        glEnd();
-        glBegin(GL_LINE_STRIP);
-        for (sPoint p : sP)
-        {
-            glVertex3f(GLfloat(p.x*deltaL- deltaL*ma)/Lpp*5,GLfloat(p.z)/Lpp*5,-GLfloat(p.y)/Lpp*5);
-        }
-        glEnd();
-
-        y=p.y;
-    }
-*/
-    }
-/*    for(int j=0;j<vPoints.size();j++)
-    {
-        sPoint p;
-        p.x=vPoints.at(j).x;
-        p.y=vPoints.at(j).y;
-        p.z=vPoints.at(j).z;
-        glBegin(GL_POINTS);
-            p.x=vPoints.at(j).x;
-            p.y=vPoints.at(j).y;
-            p.z=vPoints.at(j).z;
-            glVertex3f(GLfloat(p.x*deltaL- deltaL*ma)/Lpp*5,GLfloat(p.z)/Lpp*5,GLfloat(p.y)/Lpp*5);
-            glVertex3f(GLfloat(p.x*deltaL- deltaL*ma)/Lpp*5,GLfloat(p.z)/Lpp*5,-GLfloat(p.y)/Lpp*5);
-//            cerr<<"\np.x:"<<GLfloat(p.x*deltaL- deltaL*ma)/Lpp<<"\tp.y:"<<GLfloat(p.z)/Lpp<<"\tp.z:"<<GLfloat(p.y)/Lpp;
-        if(p.x!=xx)glEnd();
-        xx=p.x;
-//        cerr<<"\ndeltaL:"<<deltaL<<"m:"<<m<<"ma:"<<ma;
-    }
-*/
     qglColor(Qt::black);
     QFont font("楷体",15);
     renderText(100,100,"型线图! ",font);

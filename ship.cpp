@@ -87,6 +87,7 @@ bool ship::importOffsets()
             }
         else
         {
+            vZhan.push_back(pPoint.x);
             for(int j=0;inFile.peek()!='\n';j++)
             {
                 //去空格及'\t'
@@ -130,7 +131,6 @@ bool ship::importAddPTrans()
 
         for(int j=0;inFile.peek()!='\n';j++)
         {
-
             //去空格及'\t'
             inFile.get(ch);
             while(ch==' '||ch=='\t')
@@ -204,7 +204,7 @@ bool ship::import(string fileName)
         throw importError();
     inFile.close();
 
-    sort(vPoints.begin(),vPoints.end(),Cmp_by_X());
+    sort(vPoints.begin(),vPoints.end(),Cmp_by_Xz());
     vPoints.erase( unique( vPoints.begin(), vPoints.end() ), vPoints.end() );
 
     mZ=*max_element(vZ.begin(),vZ.end());
@@ -220,25 +220,25 @@ vector<sPoint> ship::drawXZ(const double &x)
     vector<sPoint> v;
     for (sPoint p : vPoints)
         if(p.x==x)v.push_back(p);
-    sort(v.begin(),v.end(),Cmp_by_Y());
-    v.erase( unique( v.begin(), v.end() ), v.end() );
+    sort(v.begin(),v.end(),Cmp_by_Zy());
+    v.erase( unique( v.begin(), v.end() ), v.end());
 
     return v;
 }
 
 
-vector<sPoint> ship::drawYX(const sPoint &s)
+vector<sPoint> ship::drawYZ(const sPoint &s)
 {
     vector<sPoint> v;
     vector<sPoint> u;
     for (sPoint p : vPoints)
-        if(p.y==s.y)
+        if(p.y==s.y&&p.z<mZ)
         {
             if(p.x<ma)v.push_back(p);
             else u.push_back(p);
         }
-    sort(v.begin(),v.end(),Cmp_by_X());
-    sort(u.begin(),u.end(),Cmp_by_X());
+    sort(v.begin(),v.end(),Cmp_by_Xz());
+    sort(u.begin(),u.end(),Cmp_by_Xz());
     v.insert(v.end(), u.begin(), u.end());
     return v;
 }
@@ -248,7 +248,7 @@ vector<sPoint> ship::drawZX(const double &z)
     vector<sPoint> v;
     for (sPoint p : vPoints)
         if(p.z==z)v.push_back(p);
-    sort(v.begin(),v.end(),Cmp_by_X());
+    sort(v.begin(),v.end(),Cmp_by_Xz());
     v.erase( unique( v.begin(), v.end() ), v.end() );
     return v;
 }
@@ -301,31 +301,45 @@ void ship::calculateAw(double zzz)            //改用梯形法（有些站没�
 
 void ship::calculateAs(double xxx,double zzz)
 {
-    double As=0,Moyy=0;    //sumMoyy用于画邦戎曲线
-    double yy=-1;
+    As=0,Moyy=0;    //sumMoyy用于画邦戎曲线
+    AsY=-1;
     double zz=-1;
     for (sPoint p : drawXZ(xxx))
     {
         if(zzz!=-1&&p.z>zzz)break;
         if(zz!=-1)
         {
-            As+=(p.y+yy)*(p.z-zz);
-            Moyy+=(p.z*p.y+zz*yy)*(p.z-zz);
+            As+=(p.y+AsY)*(p.z-zz);
+            Moyy+=(p.z*p.y+zz*AsY)*(p.z-zz);
         }
         zz=p.z;
-        yy=p.y;
+        AsY=p.y;
     }
 }
-
-
 
 void ship::calculateVolume(double zzz)
 {
     double Xb=0,Zb=0;
     double Volume=0,Myoz=0,Mxoy=0;
     double oldAw=-1,oldXf=-1,oldZ=-1;           //之后做优化
+    //    double oldZhan=-1;
     double Cp=0;
     double Zvolume=0;
+
+    /*
+    for(double zhan : vZhan)
+    {
+        if(oldZhan!=-1)
+        {
+            Volume+=(oldAs+getAs(zhan,zzz))*(zhan-oldZhan);
+        }
+    oldZhan=zhan;
+    oldAs=getAs(zhan,zzz);
+    }
+    Volume*=deltaL/2;
+    */
+
+
     for (double zz : vZ)
     {
         if(zzz!=-1&&zz>zzz)break;
@@ -339,16 +353,16 @@ void ship::calculateVolume(double zzz)
         oldAw=getAw(zz);
         oldXf=getXf(zz);
     }
+
     Volume/=2;
     Myoz/=2;
     Mxoy/=2;
 
-    Zvolume=oldAw*oldZ;
+    Zvolume=getAw(zzz)*zzz;
 
     Cp=Volume/Zvolume;
     Xb=Myoz/Volume;
     Zb=Mxoy/Volume;
-
 
     double Cb=Volume/(Lpp*B*zzz);
 
@@ -403,15 +417,14 @@ double ship::getAw(double z)           //用常量引用
         if(p.z==z)return p.value;
 }
 
-double ship::getAreaYz(double x,double z)
+double ship::getAs(double x,double z)
 {
     calculateAs(x,z);
-    cerr<<"As"<<As<<endl;
     return As;
 }
-double ship::getAreaYz(double xxx)
+double ship::getAs(double xxx)
 {
-    return getAreaYz(xxx,-1);
+    return getAs(xxx,-1);
 }
 
 double ship::getXf(double z)
@@ -452,7 +465,7 @@ void ship::calculate()
 void ship::calCm(double zzz)
 {
     calculateAs(ma,zzz);
-    double Cm=As/(B*zzz);
+    double Cm=As/(AsY*zzz);
     sZValue p;
     p.z=zzz;
     p.value=Cm;
@@ -467,30 +480,95 @@ bool ship::exLinesPlan(string fileName)
     if (outFile.is_open())
     {
         //复制的
-        for (int i=0;i<2*Xm;i++)
+        for (int i=0;i<2*Xm+1;i++)
         {
             vector<sPoint>sP=drawXZ(i);
             outFile<<"spline\n";
             for (sPoint pp : sP)
             {
                 if(pp.x<ma)pp.y=-pp.y;
-                outFile<<pp.y*1000<<","<<(pp.z+2*mZ)*1000<<"\n";
+                outFile<<pp.y*1000<<","<<(pp.z+4*mZ)*1000<<"\n";
             }
             outFile<<" \n \n \n ";
-        }
 
-        outFile<<" \n";
+        }
 
         for (double z: vZ)
         {
+            if(z==0)continue;
             vector<sPoint>sP=drawZX(z);
             outFile<<"spline\n";
             for (sPoint pp : sP)
             {
-                outFile<<(pp.x-ma)*deltaL*1000<<","<<pp.y*1000<<"\n";
+                outFile<<(pp.x-Xm)*deltaL*1000<<","<<pp.y*1000<<"\n";
             }
             outFile<<"  \n  \n  \n";
         }
+
+/*
+        double y=0;
+        for (sPoint p: vPoints)
+        {
+            if(p.y!=y)
+            {
+            vector<sPoint>sP=drawYZ(p);
+            outFile<<"spline\n";
+            for (sPoint pp : sP)
+            {
+                outFile<<(pp.x-Xm)*deltaL*1000<<","<<(pp.z+2*mZ)*1000<<"\n";
+            }
+            outFile<<"  \n  \n  \n";
+            }
+            y=p.y;
+        }
+*/
+
+
+        for (int i=0;i<2*Xm+1;i++)
+        {
+            outFile<<"line\n";
+            outFile<<(i-Xm)*deltaL*1000<<","<<2*mZ*1000<<"\n";
+            outFile<<(i-Xm)*deltaL*1000<<","<<3.5*mZ*1000<<"\n";
+            outFile<<" \n \n \n ";
+            outFile<<"line\n";
+            outFile<<(i-Xm)*deltaL*1000<<","<<0<<"\n";
+            outFile<<(i-Xm)*deltaL*1000<<","<<B*500<<"\n";
+            outFile<<" \n \n \n ";
+        }
+
+        for (double z: vZ)
+        {
+            outFile<<"line\n";
+            outFile<<-B*500<<","<<(z+4*mZ)*1000<<"\n";
+            outFile<<B*500<<","<<(z+4*mZ)*1000<<"\n";
+            outFile<<" \n \n \n ";
+            outFile<<"line\n";
+            outFile<<-Xm*deltaL*1000<<","<<(z+2*mZ)*1000<<"\n";
+            outFile<<Xm*deltaL*1000<<","<<(z+2*mZ)*1000<<"\n";
+            outFile<<" \n \n \n ";
+        }
+        outFile<<"line\n";
+        outFile<<-B*500<<","<<4*mZ*1000<<"\n";
+        outFile<<-B*500<<","<<5*mZ*1000<<"\n";
+        outFile<<" \n \n \n ";
+        outFile<<"line\n";
+        outFile<<0<<","<<4*mZ*1000<<"\n";
+        outFile<<0<<","<<5*mZ*1000<<"\n";
+        outFile<<" \n \n \n ";
+        outFile<<"line\n";
+        outFile<<B*500<<","<<4*mZ*1000<<"\n";
+        outFile<<B*500<<","<<5*mZ*1000<<"\n";
+        outFile<<" \n \n \n ";
+
+        outFile<<"line\n";
+        outFile<<-Xm*deltaL*1000<<","<<0<<"\n";
+        outFile<<Xm*deltaL*1000<<","<<0<<"\n";
+        outFile<<" \n \n \n ";
+
+        outFile<<"line\n";
+        outFile<<-Xm*deltaL*1000<<","<<B*500<<"\n";
+        outFile<<Xm*deltaL*1000<<","<<B*500<<"\n";
+        outFile<<" \n \n \n ";
     }
 
     outFile<<" \nz \n"<<"a \n ";
@@ -627,5 +705,6 @@ bool ship::exHyCurve(string fileName)
             outFile<<p.z<<","<<p.value<<"\n";
         }
     }
+    return true;
 }
 
