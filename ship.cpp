@@ -713,14 +713,14 @@ bool ship::ExBC(const string &fileName)
         {
             if(x!=As.x)
                 outFile<<" \nspline\n";
-            outFile<<(As.y/4+As.x*5)*1000<<","<<As.z*5000<<"\n";
+            outFile<<(As.y/4+As.x*8)*100<<","<<As.z*800<<"\n";
             x=As.x;
         }
         for(sPoint moyy : vMoyy)
         {
             if(x!=moyy.x)
                 outFile<<" \n \nspline\n";
-            outFile<<(moyy.y/4+moyy.x*5)*1000<<","<<moyy.z*5000<<"\n";
+            outFile<<(moyy.y/4+moyy.x*8)*100<<","<<moyy.z*800<<"\n";
             x=moyy.x;
         }
         outFile<<"zoom\na \n\n";
