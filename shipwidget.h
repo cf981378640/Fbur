@@ -30,6 +30,8 @@ protected:
 private:
     void drawLinesPlan();
     void drawHyCur();
+    void drawBC();
+
     void drawDefault();
 
     GLfloat rotationX;

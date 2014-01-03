@@ -1,9 +1,4 @@
-/****************************************************************************
-**
-**20131218修改--二次导入清空原数据
-**20131216修改
-**
-****************************************************************************/
+
 #include <iostream>
 #include "shipwidget.h"
 
@@ -21,7 +16,7 @@ ShipWidget::ShipWidget(QWidget *parent)
     rotationX = -20.0;
     rotationY = -20.0;
     rotationZ = 5.0;
-    sscale = 0.5;
+    sscale = 0.8;
 }
 
 void ShipWidget::initializeGL()
@@ -88,6 +83,7 @@ void ShipWidget::paintGL()
     {
     case 1:drawLinesPlan();break;
     case 2:drawHyCur();break;
+    case 3:drawBC();break;
     default:drawDefault();
     }
 }
@@ -124,9 +120,8 @@ void ShipWidget::wheelEvent(QWheelEvent *event)
 void ShipWidget::drawDefault()
 {
       QFont font("楷体",15);
-      renderText(100,100,"请导入数据文件! ",font);
+      renderText(100,100,"请导入数据文件，并确保数据文件在英文路径下。",font);
 }
-
 
 
 void ShipWidget::drawLinesPlan()
@@ -181,12 +176,78 @@ void ShipWidget::drawLinesPlan()
     renderText(100,100,"型线图! ",font);
 }
 
+
+void ShipWidget::drawBC()
+{
+    //drawBC
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glTranslatef(-2.0, -1.0, -10.0);
+    glScalef(sscale,1,1);
+
+   qglColor(Qt::black);
+   drawAxes();
+
+   int i=-1;
+   for(double zhan : vZhan)
+   {
+       i++;
+       if(1==i%2)continue;
+       glBegin(GL_LINE_STRIP);
+       glVertex3f(zhan*0.8,0.0,-1);
+       glVertex3f(zhan*0.8,mZ/2,-1);
+       glEnd();
+   }
+
+   qglColor(Qt::blue);
+
+    double x=-1;
+
+    glBegin(GL_LINE_STRIP);
+    for(sPoint As : vAs)
+    {
+        if(1==static_cast<int>(As.x)%2)continue;
+        if(x!=As.x)
+        {
+            glEnd();
+            glBegin(GL_LINE_STRIP);
+        }
+
+        glVertex3f((As.y/4+As.x*8)/10,As.z/4,-1);
+//        cerr<<(As.y/4+As.x*8)/10<<","<<As.z/4<<"\n";
+
+        x=As.x;
+    }
+    glEnd();
+
+    glBegin(GL_LINE_STRIP);
+    for(sPoint moyy : vMoyy)
+    {
+        if(1==static_cast<int>(moyy.x)%2)continue;
+        if(x!=moyy.x)
+        {
+            glEnd();
+            glBegin(GL_LINE_STRIP);
+        }
+
+        glVertex3f((moyy.y/4+moyy.x*8)/10,moyy.z/4,-1);
+
+        x=moyy.x;
+    }
+    glEnd();
+
+    qglColor(Qt::black);
+    QFont font("楷体",15);
+    renderText(100,100,"邦戎曲线! ",font);
+}
+
+
 void ShipWidget::drawHyCur()
 {
      glMatrixMode(GL_MODELVIEW);
      glLoadIdentity();
-     glTranslatef(-2.0, -1.0, -10.0);
-     glScalef(sscale*1.2,0.6,1);
+     glTranslatef(-0.5, -1.0, -10.0);
+     glScalef(sscale,sscale,1);
 
     qglColor(Qt::gray);
     drawAxes();
@@ -212,22 +273,23 @@ void ShipWidget::drawHyCur()
     renderText(100,100,"静水力曲线! ",font);
 }
 
+
 void ShipWidget::drawAxes()
 {
    glBegin(GL_LINES);
-   for(double i=0;i<Xm*2;i++)   //纵轴
-   {
-   glVertex3f(i,0.0,0.0);
-   glVertex3f(i,mZ,0.0);
-   }
+   //纵轴
+
+   glVertex3f(0.0,0.0,0.0);
+   glVertex3f(0,mZ,0.0);
+
    glEnd();
 
    glBegin(GL_LINES);
-   for(double i=0;i<mZ;i++)    //横轴
-   {
-   glVertex3f(0.0,i,0.0);
-   glVertex3f(Xm*2,i,0.0);
-   }
+    //横轴
+
+   glVertex3f(0.0,0.0,0.0);
+   glVertex3f(Xm*2,0.0,0.0);
+
    glEnd();
 }
 void ShipWidget::drawZb()
@@ -238,7 +300,7 @@ void ShipWidget::drawZb()
     for(sZValue p: vZb)
     {   i++;
         if(0==i)continue;
-        glVertex3f(p.value/2.5,p.z,-1);
+        glVertex3f(p.value/2,p.z,-1);
 
 //        cerr<<"Zb静水力曲线"<<p.value<<","<<p.z<<endl;
     }
@@ -253,8 +315,8 @@ void ShipWidget::drawAw()
     for(sZValue p: vAw)
     {   i++;
         if(0==i)continue;
-        glVertex3f(p.value/500,p.z,-1);
-//        cerr<<"AW静水力曲线"<<p.value/(Lpp*B)*2<<","<<p.z<<endl;
+        glVertex3f(p.value/100,p.z,-1);
+//        cerr<<"AW静水力曲线"<<p.value/100<<","<<p.z<<endl;
     }
 
     glEnd();
@@ -267,7 +329,7 @@ void ShipWidget::drawTPC()
     for(sZValue p: vTPC)
     {   i++;
         if(0==i)continue;
-        glVertex3f(p.value/5,p.z,-1);
+        glVertex3f(p.value/2,p.z,-1);
 //        cerr<<"TPC静水力曲线"<<p.value<<","<<p.z<<endl;
     }
     glEnd();
@@ -280,7 +342,7 @@ void ShipWidget::drawXf()           //有问题！！！！
     for(sZValue p: vXf)
     {   i++;
         if(0==i)continue;
-        glVertex3f((p.value+Xm)/2.5,p.z,-1);
+        glVertex3f(p.value/2+2.5,p.z,-1);
 //        cerr<<"Xf静水力曲线"<<p.value<<","<<p.z<<endl;
     }
     glEnd();
@@ -293,7 +355,7 @@ void ShipWidget::drawXb()           //
     for(sZValue p: vXb)
     {   i++;
         if(0==i)continue;
-        glVertex3f((p.value+Xm)/2.5,p.z,-1);
+        glVertex3f(p.value/2+2.5,p.z,-1);
 //        cerr<<"Xb静水力曲线"<<p.value+Xm*deltaL/3<<","<<p.z<<endl;
     }
     glEnd();
@@ -335,7 +397,7 @@ void ShipWidget::drawBm()           //
     for(sZValue p: vBm)
     {   i++;
         if(0==i)continue;
-        glVertex3f(p.value/2.5,p.z,-1);
+        glVertex3f(p.value/5,p.z,-1);
 //        cerr<<"Bm静水力曲线"<<p.value<<","<<p.z<<endl;
     }
     glEnd();
@@ -349,7 +411,7 @@ void ShipWidget::drawBml()           //
     for(sZValue p: vBml)
     {   i++;
         if(0==i)continue;
-        glVertex3f(p.value/2.5,p.z,-1);
+        glVertex3f(p.value/100,p.z,-1);
 //        cerr<<"Bml静水力曲线"<<p.value<<","<<p.z<<endl;
     }
     glEnd();
@@ -363,7 +425,7 @@ void ShipWidget::drawMTC()           //
     for(sZValue p: vMTC)
     {   i++;
         if(0==i)continue;
-        glVertex3f(p.value/25,p.z,-1);
+        glVertex3f(p.value/2,p.z,-1);
 //        cerr<<"MTC静水力曲线"<<p.value<<","<<p.z<<endl;
     }
     glEnd();
@@ -377,7 +439,7 @@ void ShipWidget::drawCwp()           //
     for(sZValue p: vCwp)
     {   i++;
         if(0==i)continue;
-        glVertex3f(p.value*10,p.z,-1);
+        glVertex3f(p.value+3,p.z,-1);
 //        cerr<<"Cwp静水力曲线"<<p.value<<","<<p.z<<endl;
     }
     glEnd();
@@ -391,7 +453,7 @@ void ShipWidget::drawCm()           //
     for(sZValue p: vCm)
     {   i++;
         if(0==i)continue;
-        glVertex3f(p.value*10,p.z,-1);
+        glVertex3f(p.value+3,p.z,-1);
 //        cerr<<"Cm静水力曲线"<<p.value<<","<<p.z<<endl;
     }
     glEnd();
@@ -405,7 +467,7 @@ void ShipWidget::drawCb()           //
     for(sZValue p: vCb)
     {   i++;
         if(0==i)continue;
-        glVertex3f(p.value*10,p.z,-1);
+        glVertex3f(p.value+3,p.z,-1);
 //        cerr<<"Cb静水力曲线"<<p.value<<","<<p.z<<endl;
     }
     glEnd();
@@ -419,7 +481,7 @@ void ShipWidget::drawCp()           //
     for(sZValue p: vCp)
     {   i++;
         if(0==i)continue;
-        glVertex3f(p.value*10,p.z,-1);
+        glVertex3f(p.value+3,p.z,-1);
 //        cerr<<"Cp静水力曲线"<<p.value<<","<<p.z<<endl;
     }
     glEnd();

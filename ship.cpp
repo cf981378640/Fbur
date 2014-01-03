@@ -9,6 +9,33 @@ using namespace std;
 
 ship::ship()
 {
+    const int numOfZ=10;
+    const int numOfZhan=25;
+    const int numOfPoint=500;
+
+    vZhan.reserve(numOfZhan);
+    vZ.reserve(numOfZ);
+    vPoints.reserve(numOfPoint);
+    vZb.reserve(numOfZ);          //浮心垂向坐标Zb**静水力曲线;
+    vBm.reserve(numOfZ);        //横稳心半径Bm**静水力曲线;
+    vAw.reserve(numOfZ);          //水线面面积Aw**静水力曲线;
+    vTPC.reserve(numOfZ);         //每厘米吃水吨数TPC**静水力曲线;
+    vMTC.reserve(numOfZ);         //每厘米纵倾力矩MTC**静水力曲线;
+    vBml.reserve(numOfZ);         //纵稳心半径Bml**静水力曲线;
+    vXf.reserve(numOfZ);          //漂心纵坐标Xf**静水力曲线;
+    vXb.reserve(numOfZ);          //浮心纵坐标Xb**静水力曲线;
+    vVolume.reserve(numOfZ);      //型排水体积Volume**静水力曲线;
+    vDisp.reserve(numOfZ);        //总排水量Disp**静水力曲线;
+    vCb.reserve(numOfZ);          //方形系数Cb**静水力曲线;
+    vCp.reserve(numOfZ);          //棱形系数Cp**静水力曲线;
+    vCwp.reserve(numOfZ);         //水线面系数Cwp**静水力曲线;
+    vCm.reserve(numOfZ);          //中横剖面系数Cm**静水力曲线;
+
+    vIt.reserve(numOfZ);
+    vIl.reserve(numOfZ);
+    vAs.reserve(numOfZhan);
+    vMoyy.reserve(numOfZhan);
+
     Init();
 }
 
@@ -35,6 +62,13 @@ void ship::Init()
     vCp.clear();          //棱形系数Cp**静水力曲线;
     vCwp.clear();         //水线面系数Cwp**静水力曲线;
     vCm.clear();          //中横剖面系数Cm**静水力曲线;
+
+
+    vIt.clear();                 //水线面的横向惯性矩--用于计算横稳心;
+    vIl.clear();                 //水线面的纵向惯性矩（对于中站横轴）--用于计算Ilf;
+
+    vAs.clear();
+    vMoyy.clear();
 
     mZ=0;
     Lpp=0,L0=0,d0=0,B=0,deltaL=0;
@@ -200,6 +234,8 @@ bool ship::importAddPWplane()
 bool ship::import(string fileName)
 {
     inFile.open(fileName.c_str());
+    if(!inFile)throw importError();
+    Init();
     if(!(importPrinDim()&&importOffsets()&&importAddPTrans()&&importAddPWplane()))
         throw importError();
     inFile.close();
@@ -207,6 +243,7 @@ bool ship::import(string fileName)
     sort(vPoints.begin(),vPoints.end(),Cmp_by_Xz());
     vPoints.erase( unique( vPoints.begin(), vPoints.end() ), vPoints.end() );
 
+    vector<sPoint>(vPoints).swap(vPoints);
     mZ=*max_element(vZ.begin(),vZ.end());
     nX=2*Xm;
     //    cerr<<"站数："<<nX;

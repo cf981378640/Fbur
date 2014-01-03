@@ -76,6 +76,7 @@
     </widget>
     <addaction name="menu_6"/>
     <addaction name="action_drawHyCur"/>
+    <addaction name="action_drawBC"/>
    </widget>
    <addaction name="menu_2"/>
    <addaction name="menu_5"/>
@@ -176,6 +177,11 @@
    </property>
   </action>
   <action name="action_ExBC">
+   <property name="text">
+    <string>邦戎曲线绘图命令</string>
+   </property>
+  </action>
+  <action name="action_drawBC">
    <property name="text">
     <string>邦戎曲线</string>
    </property>

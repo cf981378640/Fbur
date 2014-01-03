@@ -48,15 +48,14 @@ void MainWindow::on_action_import_triggered()
         fileName = QFileDialog::getOpenFileName(this, tr("导入数据文件"), " ",
                                                         tr("数据文件(*.txt)"));
         if(fileName.isEmpty())break;
-        ship1->Init();
+
         ship1->import(fileName.toStdString().data());
         QString info="请确认以下参数的正确性：\n"+("\n船舶类型:\t"+QString::number(ship1->cx)+"\n计算横剖面数:\t"+QString::number(ship1->m)+"\n计算水线数:\t"+QString::number(ship1->n)+"\n最大横剖面站号:\t"+QString::number(ship1->ma)+"\n横剖面插入点数:\t"+QString::number(ship1->cs)+"\n水线面插入点数\t"+QString::number(ship1->cw)+"\n有涡尾横剖面站数:\t"+QString::number(ship1->mw)+"\n有涡尾水线根数:\t"+QString::number(ship1->nw));
         QString info2="请确认以下参数的正确性：\n"+("\n船舯站号:\t"+QString::number(ship1->Xm)+"\n垂线间长:\t"+QString::number(ship1->Lpp)+"\n最 大 长:   \t"+QString::number(ship1->Loa)+"\n型     宽:    \t"+QString::number(ship1->B)+"\n设计水线宽:\t"+QString::number(ship1->Bw)+"\n标准站距:\t"+QString::number(ship1->deltaL)+"\n水的重度:\t"+QString::number(ship1->omega)+"\n甲板梁拱:\t"+QString::number(ship1->f)+"\n设计纵倾:\t"+QString::number(ship1->O));
         reply =QMessageBox::question(this,"确认数据！",info,QMessageBox::Yes|QMessageBox::No);
         reply2 =QMessageBox::question(this,"确认数据！",info2,QMessageBox::Yes|QMessageBox::No);
+        setWindowTitle(QFileInfo(fileName).fileName()+" - Fbur");
     }
-    if(fileName.isEmpty())fileName="未命名";
-    setWindowTitle(QFileInfo(fileName).fileName()+" - Fbur");
     ship1->calculate();
 }
 
@@ -86,6 +85,13 @@ void MainWindow::on_action_drawHyCur_triggered()
     ship1->mode=2;
     ship1->updateGL();
 }
+
+void MainWindow::on_action_drawBC_triggered()
+{
+    ship1->mode=3;
+    ship1->updateGL();
+}
+
 
 void MainWindow::on_action_X_triggered()
 {
@@ -131,3 +137,4 @@ void MainWindow::on_action_ExBC_triggered()
                                                     tr("数据文件(*.txt)"));
     ship1->ExBC(fileName.toStdString());
 }
+

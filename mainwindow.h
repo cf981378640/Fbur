@@ -45,6 +45,8 @@ private slots:
 
     void on_action_ExBC_triggered();
 
+    void on_action_drawBC_triggered();
+
 private:
     Ui::MainWindow *ui;
     ShipWidget *ship1;
